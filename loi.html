@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Law of Intentivity — Hu · Mana Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+/* == MOBILE NAV == */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:.4rem;background:none;border:none;z-index:501;}
+.hamburger span{display:block;width:24px;height:2px;background:#F2C87A;border-radius:2px;transition:all .3s;}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mobile-menu{position:fixed;inset:0;z-index:500;background:rgba(24,13,42,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.mobile-menu.open{opacity:1;pointer-events:all;}
+.mobile-menu a{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:500;letter-spacing:.1em;color:#D8CCBA;text-decoration:none;transition:color .25s;}
+.mobile-menu a:hover{color:#F2C87A;}
+.mobile-menu .m-cta{margin-top:.5rem;padding:.65rem 2rem;border:1px solid #8A9898;color:#A8B8B8;background:rgba(138,152,152,.1);font-family:'Jost',sans-serif;font-size:.65rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;}
+@media(max-width:900px){.hamburger{display:flex;}.nav-links{display:none !important;}.nav-cta{display:none !important;}}
+/* == END MOBILE NAV == */
+
+:root {
+  --stone:#1A1208; --stone-mid:#221A0E; --stone-warm:#2E2010;
+  --ochre:#8B5A1A; --ochre-lt:#C8843A; --ochre-glow:#F2C87A;
+  --sci:#1A5A8B; --sci-lt:#5AB4D8; --sci-glow:#A8DCEF;
+  --phi:#2A6B3C; --phi-lt:#4A9B5E; --phi-glow:#7AC89A;
+  --spi:#C85A00; --spi-lt:#E07820; --spi-glow:#F2A850;
+  --crown:#7B2D8B; --crown-glow:#D4A0EE;
+  --t1:#F5EDE0; --t2:#E0CCAA; --t3:#B89A6A;
+  --fd:'Cormorant Garamond',serif;
+  --ff:'Lora',serif;
+  --fb:'Jost',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fb);font-weight:400;background:var(--stone);
+  color:var(--t2);overflow-x:hidden;line-height:1.88;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--stone);}
+::-webkit-scrollbar-thumb{background:var(--ochre);border-radius:2px;}
+
+/* ══ STONE TEXTURE + SYMBOL LAYER ══ */
+#stone-texture{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 0%,rgba(139,90,26,.18) 0%,transparent 50%),
+    radial-gradient(ellipse 80% 40% at 0% 100%,rgba(26,90,139,.12) 0%,transparent 50%),
+    radial-gradient(ellipse 60% 40% at 100% 50%,rgba(42,107,60,.1) 0%,transparent 50%);
+  transition:background 3s ease;
+}
+/* Parchment grain over stone */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1;opacity:.7;
+}
+
+/* Symbol background layers — carved glyphs */
+.sym-layer{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;
+  opacity:.055;z-index:0;
+}
+.sym-layer svg{width:100%;height:100%;}
+
+/* ══ BEAM CANVAS ══ */
+#beam-canvas{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0;transition:opacity 2s ease;}
+#beam-canvas.alive{opacity:1;}
+#beam-canvas svg{width:100%;height:100%;}
+
+/* ══ CORNER PRISM LANTERN ══ */
+#corner-lantern{position:fixed;bottom:24px;left:20px;z-index:200;width:96px;
+  pointer-events:none;filter:drop-shadow(0 0 22px rgba(200,132,58,.6));}
+
+/* ══ MOBILE MENU ══ */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:.4rem;z-index:500;background:none;border:none;}
+.hamburger span{display:block;width:24px;height:2px;background:var(--ochre-glow);border-radius:2px;transition:all .3s;}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mobile-menu{position:fixed;inset:0;background:rgba(26,18,8,.97);z-index:450;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2rem;opacity:0;pointer-events:none;transition:opacity .35s ease;}
+.mobile-menu.open{opacity:1;pointer-events:all;}
+.mobile-menu a{font-family:var(--fd);font-size:2rem;font-weight:500;letter-spacing:.12em;
+  color:var(--t1);text-decoration:none;transition:color .3s;}
+.mobile-menu a:hover{color:var(--ochre-glow);}
+.mobile-menu .m-cta{margin-top:1rem;padding:.85rem 2.4rem;border:1px solid var(--ochre);
+  color:var(--ochre-glow);font-family:var(--fb);font-size:.72rem;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;text-decoration:none;}
+
+/* ══ NAV ══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:400;padding:1.3rem 3.5rem;
+  display:flex;justify-content:space-between;align-items:center;transition:background .5s,border .5s;}
+nav.scrolled{background:rgba(26,18,8,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(200,132,58,.2);}
+.nav-logo{font-family:var(--fd);font-size:1.7rem;font-weight:600;letter-spacing:.18em;
+  color:var(--ochre-glow);text-decoration:none;}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{font-size:.72rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--t3);text-decoration:none;transition:color .3s;}
+.nav-links a:hover,.nav-links a.active{color:var(--ochre-glow);}
+.nav-cta{padding:.65rem 1.6rem;border:1px solid var(--ochre);color:var(--ochre-glow);
+  font-size:.68rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
+  text-decoration:none;transition:all .3s;}
+.nav-cta:hover{background:var(--ochre);color:var(--stone);}
+
+/* ══ ANIMATIONS ══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+@keyframes flicker{0%,100%{transform:scaleX(1) scaleY(1);}
+  25%{transform:scaleX(.92) scaleY(1.06);}50%{transform:scaleX(1.05) scaleY(.96);}
+  75%{transform:scaleX(.95) scaleY(1.04);}}
+@keyframes breathe{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.08);}}
+@keyframes pulseGlow{0%,100%{opacity:.2;}50%{opacity:.8;}}
+@keyframes beamPulse{0%,100%{opacity:.35;}50%{opacity:.58;}}
+@keyframes orbitCW{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes orbitCCW{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
+@keyframes torusExpand{
+  0%{r:10;opacity:.8;}60%{r:var(--maxr);opacity:.2;}100%{r:var(--maxr);opacity:0;}
+}
+@keyframes formulaAppear{
+  from{opacity:0;transform:translateY(8px) scale(.96);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+@keyframes glyphFloat{
+  0%,100%{transform:translateY(0) rotate(0deg);}
+  33%{transform:translateY(-4px) rotate(1deg);}
+  66%{transform:translateY(2px) rotate(-1deg);}
+}
+@keyframes torchFlicker{
+  0%,100%{background:radial-gradient(ellipse 80% 60% at 50% 80%,rgba(200,132,58,.22) 0%,transparent 65%);}
+  50%{background:radial-gradient(ellipse 90% 70% at 50% 80%,rgba(200,132,58,.28) 0%,transparent 65%);}
+}
+@keyframes jetSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes jetSpinR{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
+@keyframes frictionPulse{0%,100%{opacity:.3;stroke-width:1;}50%{opacity:.9;stroke-width:2.5;}}
+
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ══ HERO ══ */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:8rem 2rem 5rem;
+  background:radial-gradient(ellipse 80% 65% at 50% 35%,#2A1A06 0%,#1A0E04 45%,var(--stone) 100%);
+}
+.hero::before{content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 40% 45% at 15% 80%,rgba(200,132,58,.2) 0%,transparent 55%),
+    radial-gradient(ellipse 28% 35% at 85% 20%,rgba(26,90,139,.12) 0%,transparent 55%),
+    radial-gradient(ellipse 22% 30% at 50% 90%,rgba(42,107,60,.1) 0%,transparent 55%);}
+
+/* Egyptian hieroglyph symbol background in hero */
+.hero-symbols{position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.06;}
+
+.prism-wrap{position:relative;margin-bottom:2.8rem;animation:float 6s ease-in-out infinite;}
+.prism-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:280px;height:300px;
+  background:
+    radial-gradient(ellipse 40% 60% at 30% 50%,rgba(90,180,216,.15) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 60% at 50% 50%,rgba(200,132,58,.18) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 60% at 70% 50%,rgba(74,155,94,.15) 0%,transparent 55%);
+  animation:breathe 4s ease-in-out infinite;pointer-events:none;}
+
+.hero-eyebrow{font-size:.68rem;font-weight:500;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--ochre);margin-bottom:1.4rem;opacity:0;animation:fadeUp 1s .35s forwards;}
+.hero-title{font-family:var(--fd);font-size:clamp(2.4rem,6vw,4.5rem);font-weight:500;
+  line-height:1.08;color:var(--t1);text-align:center;margin-bottom:.8rem;
+  opacity:0;animation:fadeUp 1s .65s forwards;}
+.hero-title em{font-style:italic;color:var(--ochre-glow);}
+.hero-sub-title{font-family:var(--fd);font-size:clamp(1.2rem,2.5vw,1.8rem);font-weight:400;
+  font-style:italic;color:var(--t3);text-align:center;margin-bottom:1.6rem;letter-spacing:.06em;
+  opacity:0;animation:fadeUp 1s .85s forwards;}
+.hero-desc{font-size:1rem;font-weight:400;line-height:1.9;color:var(--t2);
+  max-width:580px;text-align:center;margin:0 auto 3rem;
+  opacity:0;animation:fadeUp 1s 1.05s forwards;}
+.scroll-hint{position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  opacity:0;animation:fadeUp 1s 1.8s forwards;}
+.scroll-hint span{font-size:.62rem;font-weight:500;letter-spacing:.3em;
+  text-transform:uppercase;color:rgba(200,132,58,.45);}
+.scroll-line{width:1px;height:36px;
+  background:linear-gradient(to bottom,rgba(200,132,58,.55),transparent);
+  animation:pulseGlow 2.2s infinite;}
+
+/* ══ SHARED SECTION ══ */
+section{position:relative;z-index:10;}
+.s-label{font-size:.65rem;font-weight:500;letter-spacing:.38em;text-transform:uppercase;
+  color:var(--ochre-lt);margin-bottom:1.1rem;display:block;}
+.s-title{font-family:var(--fd);font-size:clamp(1.9rem,3.8vw,3rem);font-weight:500;
+  line-height:1.15;color:var(--t1);margin-bottom:1.4rem;}
+.s-title em{font-style:italic;color:var(--ochre-glow);}
+.s-body{font-size:1rem;font-weight:400;line-height:1.92;color:var(--t2);}
+.s-body p{margin-bottom:1.15rem;}
+.s-body p:last-child{margin-bottom:0;}
+.s-body strong{color:var(--t1);font-weight:500;}
+.content-wrap{max-width:820px;margin:0 auto;}
+
+/* Section backgrounds — tomb chambers */
+.sec-intro{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(42,26,6,.95) 0%,rgba(26,16,4,.8) 55%,transparent 100%);}
+.sec-hu{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 60% at 40% 50%,rgba(36,20,4,.95) 0%,rgba(22,12,2,.8) 55%,transparent 100%);}
+.sec-fem{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 60% at 60% 50%,rgba(30,18,4,.95) 0%,rgba(18,10,2,.8) 55%,transparent 100%);}
+.sec-rite{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 60% at 45% 50%,rgba(28,16,4,.95) 0%,rgba(16,8,2,.8) 55%,transparent 100%);}
+.sec-torus{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 60% at 55% 40%,rgba(24,14,4,.95) 0%,rgba(14,8,2,.8) 55%,transparent 100%);}
+.sec-jet{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(20,12,4,.95) 0%,rgba(12,6,2,.8) 55%,transparent 100%);}
+.sec-hose{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 60% at 48% 50%,rgba(18,10,4,.95) 0%,rgba(10,6,2,.8) 55%,transparent 100%);}
+.sec-lwave{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 60% at 52% 40%,rgba(16,8,16,.95) 0%,rgba(10,4,12,.8) 55%,transparent 100%);}
+.sec-reallife{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(20,12,4,.95) 0%,rgba(14,8,2,.8) 55%,transparent 100%);}
+.sec-cards{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(24,14,4,.95) 0%,rgba(16,10,2,.8) 55%,transparent 100%);}
+.sec-formulas{padding:8rem 4rem;
+  background:radial-gradient(ellipse 90% 80% at 50% 50%,rgba(8,4,20,.95) 0%,rgba(4,2,14,.8) 55%,transparent 100%);}
+.sec-close{padding:8rem 4rem 12rem;text-align:center;
+  background:radial-gradient(ellipse 90% 80% at 50% 50%,rgba(26,16,4,.95) 0%,transparent 100%);}
+
+/* Pull quote */
+.pull-quote{margin:2.8rem 0;padding:1.4rem 0 1.4rem 2rem;border-left:2px solid var(--ochre);}
+.pull-quote p{font-family:var(--ff);font-size:1.1rem;font-style:italic;font-weight:400;
+  line-height:1.65;color:var(--ochre-glow);}
+
+/* Formula inline */
+.formula-inline{
+  margin:2rem 0;padding:1.6rem 2.2rem;
+  border-left:3px solid var(--ochre-lt);
+  background:rgba(200,132,58,.06);
+  display:flex;align-items:center;gap:1.8rem;flex-wrap:wrap;
+}
+.formula-glyph{font-family:var(--fd);font-size:clamp(1.8rem,3.5vw,2.6rem);
+  font-weight:400;color:var(--t1);letter-spacing:.08em;white-space:nowrap;}
+.formula-glyph em{color:var(--ochre-glow);font-style:normal;}
+.formula-note{font-size:.88rem;font-weight:400;line-height:1.75;color:var(--t3);}
+
+/* Anim stage */
+.anim-stage{width:100%;max-width:680px;margin:3rem auto;
+  display:flex;flex-direction:column;align-items:center;gap:1.4rem;
+  padding:3rem 2rem;
+  background:rgba(200,132,58,.03);border:1px solid rgba(200,132,58,.1);
+  position:relative;z-index:1;}
+.anim-label{font-size:.65rem;font-weight:500;letter-spacing:.35em;
+  text-transform:uppercase;color:var(--ochre-lt);text-align:center;}
+.anim-caption{font-family:var(--ff);font-size:1rem;font-style:italic;font-weight:500;
+  color:var(--t3);text-align:center;line-height:1.68;max-width:520px;}
+
+/* ══ THREE-LEG READING CARDS ══ */
+.leg-reading{margin:2.8rem 0;}
+.leg-reading-title{font-family:var(--fd);font-size:1.15rem;font-weight:500;
+  color:var(--ochre-lt);margin-bottom:1.2rem;letter-spacing:.08em;}
+
+/* Desktop: three columns */
+.leg-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;}
+.leg-col{padding:1.8rem;border:1px solid;transition:all .35s;}
+.leg-col.sc{border-color:rgba(90,180,216,.18);background:rgba(26,90,139,.05);}
+.leg-col.sp{border-color:rgba(224,120,32,.18);background:rgba(200,90,0,.05);}
+.leg-col.ph{border-color:rgba(74,155,94,.18);background:rgba(42,107,60,.05);}
+.leg-col:hover{transform:translateY(-3px);}
+.leg-col.sc:hover{border-color:rgba(90,180,216,.38);}
+.leg-col.sp:hover{border-color:rgba(224,120,32,.38);}
+.leg-col.ph:hover{border-color:rgba(74,155,94,.38);}
+.leg-col-label{font-size:.6rem;font-weight:500;letter-spacing:.28em;text-transform:uppercase;
+  display:block;margin-bottom:.8rem;}
+.lsc{color:var(--sci-lt);} .lsp{color:var(--spi-lt);} .lph{color:var(--phi-lt);}
+.leg-col-body{font-size:.92rem;font-weight:400;line-height:1.82;color:var(--t2);}
+
+/* Mobile: tabs */
+.leg-tabs{display:none;}
+.tab-btns{display:flex;gap:0;}
+.tab-btn{flex:1;padding:.65rem;font-size:.62rem;font-weight:500;letter-spacing:.2em;
+  text-transform:uppercase;border:1px solid rgba(200,132,58,.2);background:transparent;
+  color:var(--t3);cursor:pointer;transition:all .3s;}
+.tab-btn.active-sc{background:rgba(26,90,139,.15);color:var(--sci-lt);border-color:rgba(90,180,216,.35);}
+.tab-btn.active-sp{background:rgba(200,90,0,.15);color:var(--spi-lt);border-color:rgba(224,120,32,.35);}
+.tab-btn.active-ph{background:rgba(42,107,60,.15);color:var(--phi-lt);border-color:rgba(74,155,94,.35);}
+.tab-content{padding:1.6rem;border:1px solid rgba(200,132,58,.15);
+  background:rgba(200,132,58,.04);display:none;}
+.tab-content.active{display:block;}
+.tab-content p{font-size:.95rem;font-weight:400;line-height:1.85;color:var(--t2);}
+
+/* Real life scenarios */
+.scenario-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.6rem;margin:2.4rem 0;}
+.scenario-card{padding:2rem;border:1px solid rgba(200,132,58,.12);
+  background:rgba(200,132,58,.04);position:relative;overflow:hidden;transition:all .4s;}
+.scenario-card:hover{border-color:rgba(200,132,58,.28);background:rgba(200,132,58,.08);}
+.scenario-icon{font-size:1.8rem;margin-bottom:.8rem;display:block;}
+.scenario-title{font-family:var(--fd);font-size:1.15rem;font-weight:500;
+  color:var(--t1);margin-bottom:.6rem;}
+.scenario-body{font-size:.9rem;font-weight:400;line-height:1.82;color:var(--t2);}
+.scenario-legs{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem;}
+.s-tag{font-size:.58rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
+  padding:.25rem .7rem;border-radius:100px;}
+.t-sc{background:rgba(26,90,139,.15);color:var(--sci-lt);border:1px solid rgba(90,180,216,.2);}
+.t-sp{background:rgba(200,90,0,.15);color:var(--spi-lt);border:1px solid rgba(224,120,32,.2);}
+.t-ph{background:rgba(42,107,60,.15);color:var(--phi-lt);border:1px solid rgba(74,155,94,.2);}
+
+/* Formula stack */
+.formula-stack{margin:3rem auto;max-width:680px;}
+.f-line{
+  display:flex;align-items:center;gap:1.4rem;padding:1.2rem 1.8rem;
+  border-left:2px solid;margin-bottom:.8rem;
+  opacity:0;transform:translateX(-12px);
+  transition:opacity .6s ease,transform .6s ease;
+  animation:flineFb 0s 2s forwards;
+}
+@keyframes flineFb{to{opacity:1;transform:translateX(0);}}
+.f-line.visible{opacity:1;transform:translateX(0);animation:none;}
+.f-line.fl-base{border-color:rgba(200,132,58,.4);background:rgba(200,132,58,.05);}
+.f-line.fl-sci{border-color:rgba(90,180,216,.4);background:rgba(26,90,139,.05);}
+.f-line.fl-fem{border-color:rgba(224,120,32,.4);background:rgba(200,90,0,.05);}
+.f-line.fl-phi{border-color:rgba(74,155,94,.4);background:rgba(42,107,60,.05);}
+.f-line.fl-all{border-color:rgba(212,160,238,.4);background:rgba(123,45,139,.05);}
+.f-glyph{font-family:var(--fd);font-size:1.5rem;font-weight:400;
+  color:var(--t1);white-space:nowrap;min-width:220px;}
+.f-glyph em{color:var(--ochre-glow);font-style:normal;}
+.f-desc{font-size:.85rem;font-weight:400;line-height:1.72;color:var(--t3);}
+
+/* CTA buttons */
+.btn-loi{padding:1rem 2.8rem;background:var(--ochre);color:var(--stone);
+  font-size:.74rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
+  text-decoration:none;display:inline-block;transition:all .3s;margin:.6rem;}
+.btn-loi:hover{background:var(--ochre-lt);transform:translateY(-2px);}
+.btn-ghost-loi{padding:1rem 2.8rem;background:transparent;color:var(--t1);
+  font-size:.74rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
+  text-decoration:none;display:inline-block;
+  border:1px solid rgba(240,232,216,.22);transition:all .3s;margin:.6rem;}
+.btn-ghost-loi:hover{border-color:var(--ochre-lt);color:var(--ochre-glow);}
+
+/* Scroll to top */
+#scroll-top{position:fixed;bottom:90px;right:20px;z-index:300;
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(26,18,8,.88);border:1px solid rgba(200,132,58,.4);
+  color:var(--ochre-glow);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .4s,transform .3s;
+  backdrop-filter:blur(8px);}
+#scroll-top.visible{opacity:1;pointer-events:all;}
+#scroll-top:hover{transform:translateY(-3px);border-color:rgba(200,132,58,.7);}
+
+/* Footer */
+.leg-footer{padding:3rem 4rem;border-top:1px solid rgba(200,132,58,.18);
+  display:flex;justify-content:space-between;align-items:center;
+  position:relative;z-index:10;}
+.leg-footer-links{display:flex;gap:2rem;list-style:none;}
+.leg-footer-links a{font-size:.7rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--t3);text-decoration:none;transition:color .3s;}
+.leg-footer-links a:hover{color:var(--ochre-lt);}
+.leg-elh{font-family:var(--fd);font-size:1.05rem;font-style:italic;color:rgba(200,132,58,.4);}
+
+@media(max-width:900px){
+  nav{padding:1.1rem 1.5rem;}
+  .nav-links,.nav-cta{display:none;}
+  .hamburger{display:flex;}
+  .leg-cols{display:none;}
+  .leg-tabs{display:block;}
+  .scenario-grid{grid-template-columns:1fr;}
+  section{padding:5rem 1.5rem !important;}
+  #corner-lantern{width:70px;bottom:16px;left:14px;}
+  .leg-footer{flex-direction:column;gap:1.5rem;text-align:center;padding:2rem 1.5rem;}
+  .f-glyph{min-width:auto;font-size:1.1rem;}
+  .formula-inline{flex-direction:column;gap:.8rem;}
+}
+
+/* ── MOBILE MENU FIXES ── */
+.mobile-menu a{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.45rem !important;
+  font-weight:500;
+  letter-spacing:.1em;
+  color:#D8CCBA !important;
+  text-decoration:none;
+  transition:color .3s;
+}
+.mobile-menu a:hover{color:#F2C87A !important;}
+.mobile-menu .m-cta{
+  margin-top:.8rem;
+  padding:.75rem 2.2rem;
+  border:1px solid #8A9090 !important;
+  color:#B0BCBC !important;
+  background:rgba(138,144,144,.1) !important;
+  font-family:'Jost',sans-serif;
+  font-size:.68rem !important;
+  font-weight:500;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  text-decoration:none;
+  transition:all .3s;
+}
+.mobile-menu .m-cta:hover{
+  background:rgba(138,144,144,.22) !important;
+  color:#D8E0E0 !important;
+}
+/* ── FOOTER MOBILE FIX ── */
+@media(max-width:900px){
+  .leg-footer-links{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem !important;
+  }
+  .leg-footer-links a{font-size:.62rem !important;}
+  .ft-links a{font-size:.75rem !important;}
+  .ft-grid{grid-template-columns:1fr 1fr !important;}
+}
+/* ── CONTEXTUAL QUICK LINKS ── */
+.quick-link{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-size:.7rem;font-weight:500;letter-spacing:.18em;
+  text-transform:uppercase;text-decoration:none;
+  color:rgba(200,132,58,.7);
+  border-bottom:1px solid rgba(200,132,58,.25);
+  padding-bottom:.1rem;
+  transition:all .3s;margin:.2rem .5rem .2rem 0;
+}
+.quick-link:hover{color:#F2C87A;border-bottom-color:rgba(200,132,58,.6);}
+.quick-link.sc{color:rgba(90,180,216,.7);border-bottom-color:rgba(90,180,216,.25);}
+.quick-link.sc:hover{color:#A8DCEF;border-bottom-color:rgba(90,180,216,.6);}
+.quick-link.ph{color:rgba(212,160,23,.7);border-bottom-color:rgba(212,160,23,.25);}
+.quick-link.ph:hover{color:#E4C86A;border-bottom-color:rgba(212,160,23,.6);}
+.quick-link.sp{color:rgba(224,120,32,.7);border-bottom-color:rgba(224,120,32,.25);}
+.quick-link.sp:hover{color:#F2A850;border-bottom-color:rgba(224,120,32,.6);}
+.quick-link.cr{color:rgba(181,123,238,.7);border-bottom-color:rgba(181,123,238,.25);}
+.quick-link.cr:hover{color:#D4A0EE;border-bottom-color:rgba(181,123,238,.6);}
+.quick-links-bar{
+  margin:1.8rem 0;
+  padding:.9rem 1.4rem;
+  background:rgba(200,132,58,.04);
+  border-left:2px solid rgba(200,132,58,.2);
+  display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;
+}
+.quick-links-bar span{
+  font-size:.6rem;font-weight:500;letter-spacing:.22em;
+  text-transform:uppercase;color:rgba(200,132,58,.45);
+  margin-right:.4rem;
+}
+
+
+/* Reveal fallback */
+.reveal{animation:rvFb 0s 2.5s forwards;}
+@keyframes rvFb{to{opacity:1;transform:translateY(0);}}
+/* ── HM ICON SYSTEM ── */
+/* ── HM ICON SYSTEM ── */
+
+.ql-bar{margin:1.6rem 0;padding:.85rem 1.4rem;background:rgba(200,132,58,.04);border-left:2px solid rgba(200,132,58,.18);display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;position:relative;z-index:1;}
+.ql-bar-label{font-size:.58rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:rgba(200,132,58,.4);margin-right:.2rem;}
+.ql{display:inline-flex;align-items:center;gap:.3rem;font-size:.65rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;padding:.2rem .6rem;border:1px solid rgba(200,132,58,.22);color:rgba(200,132,58,.78);transition:all .3s;}
+.ql:hover{border-color:rgba(200,132,58,.55);color:#F2C87A;}
+.ql.sc{border-color:rgba(90,180,216,.22);color:rgba(90,180,216,.78);}
+.ql.sc:hover{border-color:rgba(90,180,216,.55);color:#A8DCEF;}
+.ql.ph{border-color:rgba(212,160,23,.22);color:rgba(212,160,23,.78);}
+.ql.ph:hover{border-color:rgba(212,160,23,.55);color:#E4C86A;}
+.ql.sp{border-color:rgba(224,120,32,.22);color:rgba(224,120,32,.78);}
+.ql.sp:hover{border-color:rgba(224,120,32,.55);color:#F2A850;}
+.ql.cr{border-color:rgba(181,123,238,.22);color:rgba(181,123,238,.78);}
+.ql.cr:hover{border-color:rgba(181,123,238,.55);color:#D4A0EE;}
+
+/* ── BUTTON COLOR SCHEME — WARM AMBER ── */
+.btn-root, .btn-primary, .btn-enter {
+  background: linear-gradient(135deg, #C8843A 0%, #E4A85A 100%);
+  color: #180D2A;
+  border: none;
+  box-shadow: 0 4px 24px rgba(200,132,58,.35);
+  transition: all .3s ease;
+}
+.btn-root:hover, .btn-primary:hover, .btn-enter:hover {
+  background: linear-gradient(135deg, #E4A85A 0%, #F2C87A 100%);
+  box-shadow: 0 6px 32px rgba(200,132,58,.55);
+  transform: translateY(-2px);
+}
+.btn-ghost, .btn-loi {
+  background: transparent;
+  color: #F2C87A;
+  border: 1px solid rgba(200,132,58,.5);
+  transition: all .3s ease;
+}
+.btn-ghost:hover, .btn-loi:hover {
+  background: rgba(200,132,58,.12);
+  border-color: #C8843A;
+  color: #F2C87A;
+  transform: translateY(-2px);
+}
+.nav-cta {
+  background: rgba(200,132,58,.15);
+  border: 1px solid rgba(200,132,58,.55);
+  color: #F2C87A;
+  transition: all .3s ease;
+}
+.nav-cta:hover {
+  background: #C8843A;
+  color: #180D2A;
+}
+.mobile-menu .m-cta {
+  border: 1px solid rgba(200,132,58,.5) !important;
+  color: #F2C87A !important;
+  background: rgba(200,132,58,.12) !important;
+}
+.mobile-menu .m-cta:hover {
+  background: rgba(200,132,58,.25) !important;
+  color: #F2C87A !important;
+}
+/* ── END BUTTON COLORS ── */
+
+
+
+
+
+
+/* ══ HML SLIDE-BY v34 ══ */
+.hml-slide{
+  position:fixed;
+  bottom:4.5rem;
+  right:-340px;
+  width:min(300px,58vw);
+  z-index:390;
+  background:rgba(14,8,24,.97);
+  border:1px solid rgba(200,132,58,.2);
+  border-right:none;
+  padding:1.1rem 1.3rem 1rem;
+  transition:right .5s cubic-bezier(.22,1,.36,1);
+  pointer-events:none;
+}
+.hml-slide.visible{right:0;pointer-events:all;transition:right .5s cubic-bezier(.22,1,.36,1),opacity .4s ease;}
+.hml-slide-close{
+  position:absolute;top:.45rem;right:.55rem;
+  font-size:.55rem;font-weight:500;letter-spacing:.15em;
+  color:rgba(200,170,120,.3);cursor:pointer;
+  background:none;border:none;font-family:'Jost',sans-serif;
+  transition:color .25s;padding:0;
+}
+.hml-slide-close:hover{color:rgba(200,170,120,.65);}
+.hml-slide-crystals{display:flex;gap:3px;margin-bottom:.6rem;flex-wrap:wrap;}
+.hml-slide-crystal{width:6px;height:6px;border-radius:50%;background:rgba(200,132,58,.15);transition:all .5s;flex-shrink:0;}
+.hml-slide-crystal.lit{background:#F2C87A;box-shadow:0 0 6px rgba(242,200,122,.7);}
+.hml-slide-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:.9rem;font-weight:500;color:#F2C87A;
+  margin-bottom:.5rem;line-height:1.2;
+}
+.hml-slide-summary{
+  font-size:.75rem;font-weight:400;line-height:1.6;
+  color:#D4B896;margin-bottom:.7rem;
+  padding-bottom:.7rem;
+  border-bottom:1px solid rgba(200,132,58,.15);
+}
+.hml-slide-legs{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.8rem;}
+.hml-leg-row{display:flex;align-items:flex-start;gap:.5rem;text-decoration:none;transition:opacity .2s;}
+.hml-leg-row:hover{opacity:.8;}
+.hml-leg-row svg{flex-shrink:0;margin-top:1px;}
+.hml-leg-text{font-size:.72rem;font-weight:400;line-height:1.5;}
+.hml-leg-sc .hml-leg-text{color:rgba(90,180,216,.9);}
+.hml-leg-sp .hml-leg-text{color:rgba(224,140,42,.9);}
+.hml-leg-ph .hml-leg-text{color:rgba(74,165,94,.9);}
+.hml-slide-newtab{
+  font-size:.6rem;font-weight:500;letter-spacing:.12em;
+  color:rgba(242,200,122,.6);display:none;
+  margin-bottom:.6rem;font-style:italic;
+}
+.hml-slide-newtab.show{display:block;}
+.hml-slide-gotit{
+  width:100%;padding:.55rem;
+  background:rgba(200,132,58,.12);
+  border:1px solid rgba(200,132,58,.3);
+  color:#F2C87A;font-size:.62rem;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;
+  cursor:pointer;font-family:'Jost',sans-serif;
+  transition:all .25s;
+}
+.hml-slide-gotit:hover{background:rgba(200,132,58,.25);}
+@media(max-width:600px){
+  .hml-slide{width:min(270px,62vw);padding:.9rem 1rem .85rem;}
+  .hml-leg-text{font-size:.68rem;}
+  .hml-slide-title{font-size:.82rem;}
+}
+/* ══ END HML SLIDE-BY ══ */
+
+</style>
+<script>
+function MT(g,l,b){
+  var s=['sc','sp','ph'];
+  for(var i=0;i<s.length;i++){
+    var p=document.getElementById(g+'-'+s[i]);
+    if(p) p.style.cssText='display:none;padding:1.2rem 1.4rem;background:rgba(26,18,8,.6);border:1px solid rgba(200,132,58,.1);border-top:none;';
+  }
+  if(b&&b.parentElement){
+    var btns=b.parentElement.querySelectorAll('.tab-btn');
+    for(var i=0;i<btns.length;i++) btns[i].className='tab-btn';
+  }
+  var t=document.getElementById(g+'-'+l);
+  if(t) t.style.cssText='display:block;padding:1.2rem 1.4rem;background:rgba(26,18,8,.6);border:1px solid rgba(200,132,58,.1);border-top:none;';
+  if(b) b.className='tab-btn a-'+l;
+}
+function ST(w,l,b){
+  var g=w.replace('tabs-','');
+  var s=['sc','sp','ph'];
+  for(var i=0;i<s.length;i++){
+    var p=document.getElementById(g+'-'+s[i]);
+    if(p) p.style.cssText='display:none;padding:1.6rem;border:1px solid rgba(200,132,58,.15);background:rgba(200,132,58,.04);';
+  }
+  if(b&&b.parentElement){
+    var btns=b.parentElement.querySelectorAll('.tab-btn');
+    for(var i=0;i<btns.length;i++) btns[i].className='tab-btn';
+  }
+  var t=document.getElementById(g+'-'+l);
+  if(t) t.style.cssText='display:block;padding:1.6rem;border:1px solid rgba(200,132,58,.15);background:rgba(200,132,58,.04);';
+  if(b) b.className='tab-btn active-'+l;
+}
+
+  // IntersectionObserver reveal
+  if('IntersectionObserver' in window){
+    var _io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.add('visible');_io.unobserve(e.target);}
+      });
+    },{threshold:0.05,rootMargin:'0px 0px -40px 0px'});
+    document.querySelectorAll('.reveal').forEach(function(el){_io.observe(el);});
+    // Also observe f-line elements
+    document.querySelectorAll('.f-line').forEach(function(el){_io.observe(el);});
+  }
+  setTimeout(function(){
+    document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});
+    document.querySelectorAll('.f-line').forEach(function(el){el.classList.add('visible');el.style.opacity='1';el.style.transform='translateX(0)';});
+  },3000);
+</script>
+</head>
+<body>
+<!-- ══ HML SLIDE-BY ══ -->
+<div class="hml-slide" id="hml-slide">
+  <button class="hml-slide-close" onclick="hmlSlideClose()">✕</button>
+  <div class="hml-slide-crystals" id="hml-crystals"></div>
+  <div class="hml-slide-title" id="hml-slide-title"></div>
+  <div class="hml-slide-summary" id="hml-slide-summary"></div>
+  <div class="hml-slide-legs" id="hml-slide-legs"></div>
+  <div class="hml-slide-newtab" id="hml-newtab">Opening HML in a new tab ↗</div>
+  <div style="display:flex;gap:.5rem;"><button class="hml-slide-gotit" onclick="hmlGotIt()" style="flex:1;">Got it</button><button class="hml-slide-gotit" onclick="hmlHideAll()" style="flex:1;background:rgba(80,50,80,.2);border-color:rgba(180,100,180,.2);color:rgba(200,170,200,.6);">Hide This</button></div>
+</div>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html">Home</a>
+  <a href="science.html">Science</a>
+  <a href="spirituality.html">Spirituality</a>
+  <a href="philosophy.html">Philosophy</a>
+  <a href="loi.html">Law of Intentivity</a>
+  <a href="hml.html">Hu-Mana Language</a>
+  <a href="spine.html">The Spine</a>
+  <a href="huarewe.html" class="m-cta">Begin the Practice</a>
+</div>
+
+<nav id="nav">
+  <a href="index.html" class="nav-logo">Hu · Mana</a>
+  <ul class="nav-links">
+    <li><a href="index.html#what">The Model</a></li>
+    <li><a href="science.html">Science</a></li>
+    <li><a href="spirituality.html">Spirituality</a></li>
+    <li><a href="philosophy.html">Philosophy</a></li>
+    <li><a href="loi.html" class="active">LOI</a></li>
+    <li><a href="hml.html">HML</a></li>
+    <li><a href="spine.html">Spine</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <a href="huarewe.html" class="nav-cta">Begin the Practice</a>
+</nav>
+
+<!-- ══════════════════════════════════════
+     HERO
+     ══════════════════════════════════════ -->
+<section class="hero" id="top">
+
+  <!-- Egyptian symbols pressed into hero background -->
+  <div class="hero-symbols">
+    <svg width="100%" height="100%" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+      <!-- Eye of Horus -->
+      <g transform="translate(80,100)" opacity=".8">
+        <path d="M0 20 Q40 0 80 20 Q40 40 0 20Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="40" cy="20" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="40" cy="20" r="3" fill="currentColor"/>
+        <path d="M40 28 L36 44 L40 42 L44 44 Z" fill="none" stroke="currentColor" stroke-width="1"/>
+        <path d="M28 32 L20 45" stroke="currentColor" stroke-width="1" fill="none"/>
+      </g>
+      <!-- Ankh -->
+      <g transform="translate(700,80)" opacity=".8">
+        <path d="M20 0 Q20 -18 0 -18 Q-20 -18 -20 0 Q-20 18 0 18 Q20 18 20 0Z" fill="none" stroke="currentColor" stroke-width="1.5" transform="translate(0,0)"/>
+        <line x1="0" y1="18" x2="0" y2="60" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="-22" y1="30" x2="22" y2="30" stroke="currentColor" stroke-width="1.5"/>
+      </g>
+      <!-- Djed Pillar -->
+      <g transform="translate(400,50)" opacity=".7">
+        <line x1="0" y1="0" x2="0" y2="80" stroke="currentColor" stroke-width="2"/>
+        <line x1="-15" y1="20" x2="15" y2="20" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="-15" y1="30" x2="15" y2="30" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="-15" y1="40" x2="15" y2="40" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="-12" y1="50" x2="12" y2="50" stroke="currentColor" stroke-width="1.2"/>
+      </g>
+      <!-- Phi spiral -->
+      <g transform="translate(600,400)" opacity=".6">
+        <path d="M0 0 Q0 -30 30 -30 Q60 -30 60 0 Q60 30 30 30 Q15 30 15 15 Q15 0 30 0 Q37 0 37 7 Q37 15 30 15" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <text x="70" y="5" font-size="14" fill="currentColor" font-family="serif">φ</text>
+      </g>
+      <!-- Greek letters -->
+      <text x="150" y="500" font-size="28" fill="currentColor" opacity=".6" font-family="serif">Ω</text>
+      <text x="220" y="480" font-size="22" fill="currentColor" opacity=".5" font-family="serif">Σ</text>
+      <text x="280" y="510" font-size="26" fill="currentColor" opacity=".55" font-family="serif">Δ</text>
+      <text x="340" y="490" font-size="20" fill="currentColor" opacity=".5" font-family="serif">λ</text>
+      <text x="680" y="500" font-size="24" fill="currentColor" opacity=".55" font-family="serif">π</text>
+      <text x="730" y="480" font-size="22" fill="currentColor" opacity=".5" font-family="serif">θ</text>
+      <!-- Zodiac symbols -->
+      <text x="50" y="400" font-size="20" fill="currentColor" opacity=".5">♈</text>
+      <text x="90" y="400" font-size="20" fill="currentColor" opacity=".5">♉</text>
+      <text x="130" y="400" font-size="20" fill="currentColor" opacity=".5">♊</text>
+      <text x="50" y="430" font-size="20" fill="currentColor" opacity=".5">♋</text>
+      <text x="90" y="430" font-size="20" fill="currentColor" opacity=".5">♌</text>
+      <text x="130" y="430" font-size="20" fill="currentColor" opacity=".5">♍</text>
+      <text x="660" y="350" font-size="20" fill="currentColor" opacity=".5">♎</text>
+      <text x="700" y="350" font-size="20" fill="currentColor" opacity=".5">♏</text>
+      <text x="740" y="350" font-size="20" fill="currentColor" opacity=".5">♐</text>
+      <text x="660" y="380" font-size="20" fill="currentColor" opacity=".5">♑</text>
+      <text x="700" y="380" font-size="20" fill="currentColor" opacity=".5">♒</text>
+      <text x="740" y="380" font-size="20" fill="currentColor" opacity=".5">♓</text>
+      <!-- Fibonacci numbers -->
+      <text x="350" y="550" font-size="11" fill="currentColor" opacity=".45" font-family="serif" letter-spacing="4">1 · 1 · 2 · 3 · 5 · 8 · 13 · 21 · 34 · 55 · 89</text>
+      <!-- Ouroboros hint -->
+      <g transform="translate(400,400)" opacity=".5">
+        <circle cx="0" cy="0" r="35" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="8,4"/>
+        <path d="M30 10 Q35 0 30 -10" fill="none" stroke="currentColor" stroke-width="2"/>
+      </g>
+      <!-- Caduceus hint -->
+      <g transform="translate(750,200)" opacity=".5">
+        <line x1="0" y1="0" x2="0" y2="80" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M0 20 Q20 30 0 40 Q-20 50 0 60" fill="none" stroke="currentColor" stroke-width="1"/>
+        <path d="M0 20 Q-20 30 0 40 Q20 50 0 60" fill="none" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="prism-wrap">
+    <div class="prism-glow"></div>
+    <!-- Prism lantern hero — large -->
+    <svg width="180" height="260" viewBox="0 0 180 260" fill="none">
+      <defs>
+        <radialGradient id="hpf1" cx="50%" cy="72%" r="58%">
+          <stop offset="0%" stop-color="#F2C87A"/>
+          <stop offset="50%" stop-color="#E4903A"/>
+          <stop offset="100%" stop-color="#C85A20"/>
+        </radialGradient>
+        <radialGradient id="hpf2" cx="50%" cy="62%" r="50%">
+          <stop offset="0%" stop-color="#FFFAD0"/>
+          <stop offset="62%" stop-color="#F2C87A"/>
+          <stop offset="100%" stop-color="#E4A850"/>
+        </radialGradient>
+      </defs>
+      <line x1="90" y1="2" x2="90" y2="16" stroke="#8B6A3C" stroke-width="1.8"/>
+      <path d="M54 18 Q90 12 126 18 L120 28 Q90 23 60 28Z" fill="#4A3010"/>
+      <circle cx="60" cy="19" r="2.2" fill="#8B6A3C"/>
+      <circle cx="120" cy="19" r="2.2" fill="#8B6A3C"/>
+      <!-- Prism faces with color tints -->
+      <path d="M60 28 L48 160 L90 174 L90 28Z" fill="rgba(200,132,58,.1)" stroke="#C8843A" stroke-width=".8"/>
+      <path d="M90 28 L90 174 L132 160 L120 28Z" fill="rgba(26,90,139,.08)" stroke="#5AB4D8" stroke-width=".8"/>
+      <!-- Spectrum rays cast outside -->
+      <line x1="48" y1="95" x2="14" y2="80" stroke="rgba(90,180,216,.6)" stroke-width="2.5"/>
+      <line x1="48" y1="104" x2="10" y2="104" stroke="rgba(200,132,58,.6)" stroke-width="2.5"/>
+      <line x1="48" y1="113" x2="14" y2="128" stroke="rgba(74,155,94,.6)" stroke-width="2.5"/>
+      <!-- Frame details -->
+      <line x1="90" y1="28" x2="90" y2="174" stroke="#8B6A3C" stroke-width="1" opacity=".5"/>
+      <path d="M56 72 Q90 78 124 72" stroke="#8B6A3C" stroke-width=".9" fill="none" opacity=".38"/>
+      <path d="M53 116 Q90 123 127 116" stroke="#8B6A3C" stroke-width=".9" fill="none" opacity=".38"/>
+      <path d="M51 150 Q90 157 129 150" stroke="#8B6A3C" stroke-width=".8" fill="none" opacity=".28"/>
+      <!-- Flame -->
+      <ellipse cx="90" cy="102" rx="22" ry="30" fill="rgba(242,200,122,.1)"/>
+      <g style="animation:flicker 2.9s ease-in-out infinite;transform-origin:50% 78%">
+        <path d="M90 128 C80 119 77 104 81 91 C84 83 87 77 90 70 C93 77 96 83 99 91 C103 104 100 119 90 128Z" fill="url(#hpf1)"/>
+        <path d="M90 122 C83 114 80 103 84 92 C86 85 88 81 90 76 C92 81 94 85 96 92 C100 103 97 114 90 122Z" fill="url(#hpf2)"/>
+        <path d="M90 114 C86 108 85 100 87 93 C88 90 89 87 90 84 C91 87 92 90 93 93 C95 100 94 108 90 114Z" fill="rgba(255,252,220,.8)"/>
+      </g>
+      <!-- Base -->
+      <path d="M48 160 L42 180 Q90 192 138 180 L132 160Z" fill="#3A2210" stroke="#6B4A28" stroke-width=".9"/>
+      <!-- Key on base -->
+      <g opacity=".85">
+        <rect x="108" y="160" width="22" height="13" rx="3" fill="#2A1808" stroke="#8B6A3C" stroke-width=".8"/>
+        <circle cx="119" cy="166" r="7" fill="#4A3018" stroke="#C8A060" stroke-width="1"/>
+        <line x1="110" y1="166" x2="128" y2="166" stroke="#C8A060" stroke-width=".8" opacity=".7"/>
+      </g>
+      <ellipse cx="64" cy="186" rx="9" ry="3.5" fill="#1A0E04"/>
+      <ellipse cx="116" cy="186" rx="9" ry="3.5" fill="#1A0E04"/>
+    </svg>
+  </div>
+
+  <p class="hero-eyebrow">The Law of Intentivity · The Hu-Mana Language</p>
+  <h1 class="hero-title">One light.<br><em>Three expressions.</em></h1>
+  <p class="hero-sub-title">The grammar beneath science, spirituality, and philosophy simultaneously.</p>
+  <p class="hero-desc">What you are about to walk through is not a new theory competing with what already exists. It is the layer one level beneath — the pattern from which science, spirituality, and philosophy each independently arose. The formulas do not change. The equations stay exactly as written. The LOI shows what they are describing from the inside of relation rather than the outside of matter.</p>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Enter the chamber</span>
+  </div>
+</section>
+
+<!-- ══ INTRO ══ -->
+<section class="sec-intro" id="intro">
+  <!-- Symbol layer — Flower of Life in background -->
+  <div class="sym-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.04;z-index:0;">
+    <svg width="100%" height="100%" viewBox="0 0 400 300">
+      <g transform="translate(200,150)">
+        <circle cx="0" cy="0" r="40" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <circle cx="40" cy="0" r="40" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <circle cx="-40" cy="0" r="40" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <circle cx="20" cy="34.6" r="40" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <circle cx="-20" cy="34.6" r="40" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <circle cx="20" cy="-34.6" r="40" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <circle cx="-20" cy="-34.6" r="40" fill="none" stroke="currentColor" stroke-width=".8"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="content-wrap" style="position:relative;z-index:1;">
+    <span class="s-label reveal">What it is · How it works · Why it matters</span>
+    <h2 class="s-title reveal">The meta-language.<br><em>Not a theory — a grammar.</em></h2>
+    <div class="s-body reveal">
+      <p>Every theory competes with other theories for the correct description of reality. A grammar is the structure in which multiple correct descriptions can recognize each other without anyone having to surrender their ground.</p>
+      <p>The Law of Intentivity is that grammar. It works one level beneath science, spirituality, and philosophy — at the level of pattern, polarity, resonance, and cycle — and shows that all three independently discovered the same structural primitives. They named them differently. They encoded them in different symbol systems. The Hu-Mana Language gives them a shared name so they can finally speak to each other without translation loss.</p>
+      <p>No equation changes. No doctrine is challenged. No tradition is demoted. What changes is that for the first time, a physicist, a priest, and a philosopher can look at the same phenomenon — and read each other's description of it.</p>
+    </div>
+
+    <div class="formula-inline reveal">
+      <div class="formula-glyph">E = m<em>C</em>²</div>
+      <div class="formula-note">The physics baseline — unchanged. The LOI asks only what C is fully accounting for. Electromagnetic light measured precisely. Plus the consciousness-generated energetic output of every <span data-hml="cu" class="hml-term">CU</span> — not yet formally included. The math stays intact. The scope becomes whole.</div>
+    </div>
+
+    <div class="quick-links-bar reveal"><span>The language reference</span><a href="hml.html" class="quick-link">Complete HML Glossary →</a></div>
+    <div class="s-body reveal">
+      <p>Walk through every letter of the Hu-Mana Language. Watch how each one has been independently discovered by science under one name, by spirituality under another, and by philosophy under a third. Watch them stack into a complete architecture. Then read the real-life applications and feel how the same grammar describes everything from a morning thought to a galaxy forming.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HU + MANA ══ -->
+<section class="sec-hu" id="hu">
+  <div class="sym-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.05;z-index:0;">
+    <svg width="100%" height="100%" viewBox="0 0 600 400">
+      <!-- Egyptian cartouche shapes -->
+      <ellipse cx="100" cy="200" rx="60" ry="30" fill="none" stroke="currentColor" stroke-width=".8"/>
+      <line x1="40" y1="218" x2="160" y2="218" stroke="currentColor" stroke-width="1.2"/>
+      <text x="300" y="180" font-size="42" fill="currentColor" font-family="serif" opacity=".6">𓂀</text>
+      <text x="400" y="220" font-size="32" fill="currentColor" font-family="serif" opacity=".5">𓅃</text>
+      <!-- Hebrew Aleph -->
+      <text x="500" y="160" font-size="48" fill="currentColor" font-family="serif" opacity=".5">א</text>
+      <!-- Sanskrit Om -->
+      <text x="160" y="280" font-size="42" fill="currentColor" font-family="serif" opacity=".55">ॐ</text>
+    </svg>
+  </div>
+
+  <div class="content-wrap" style="position:relative;z-index:1;">
+    <span class="s-label reveal">Letter · <span data-hml="hu" class="hml-term">HU</span> and MANA</span>
+    <h2 class="s-title reveal"><em><span data-hml="hu" class="hml-term">HU</span></em> — The Base One of Being<br><em>MANA</em> — The Living Field</h2>
+
+    <div class="s-body reveal">
+      <p><strong>What it is:</strong> <span data-hml="hu" class="hml-term">HU</span> is the oldest sound humanity has used for the creative spark. Not a concept borrowed across cultures — a recognition that arose separately in twelve civilizations and arrived at the same phoneme. The breath before the word. The frequency that precedes all form.</p>
+      <p><strong>How it works:</strong> <span data-hml="hu" class="hml-term">HU</span> is existence itself — the bare fact that something rather than nothing is present, so that fields can form and patterns can arise. MANA is the medium — the living charge that accumulates through right alignment and depletes throuHU without MANA is a word spoken into a vacuum. MANA without HU is a field without direction.</p>
+      <p><strong>Why it matters:</strong> Every field theory requires both a sourHU and MANA are the pre-physical layer from which all field relations emerge. Before E = mc², before any particular energy configuration, there is being expressing through a medium. The potter and the clay. The word and the field it writes into.</p>
+    </div>
+
+    <div class="formula-inline reveal">
+      <div class="formulHU</em> × <span data-hml="mana" class="hml-term">Mana</span></div>
+      <div class="formula-noteHU — existence — expressing through <span data-hml="mana" class="hml-term">Mana</span> — its medium. The pre-physical layer the LOI describes. Before any mass or energy configuration, there is being in a field. This is where the Law of Intentivity begins.</div>
+    </div>
+
+    <div class="leg-reading reveal">
+      <div class="leHU and MANA — read through three legs</div>
+      <!-- Desktop -->
+      <div class="leg-cols">
+        <div class="leg-col sc">
+          <span class="leg-col-label lsc"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="1"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg> Science</span>
+          <p clasHU: Existence itself — the bare ontological fact that all physics presupposes. Without it there is nothing for energy to move through, nothing for a field to organize. MANA: The quantum field — spacetime as the carrier of pattern. The Schumann Resonance is Earth's measurable MANA field. Every field equation already assumes both a source and a medium. The LOI names what they are.</p>
+        </div>
+        <div class="leg-col sp">
+          <span class="leg-col-label lsp"><svg class="hm-icon" width="22" height="22" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg> Spirituality</span>
+          <p clasHU: I Am. Divine presence. The creative word found at the root of every tradition — the breath of Ptah, HU, the Hebrew YHVH, the Mayan Hunab Ku. MANA: Shakti, Prana, Qi, Ki, Ruach, Orenda, Nwyfre — twelve traditions, twelve names, one recognition. The living charge that accumulates through prayer and genuine practice. God in and as creation.</p>
+        </div>
+        <div class="leg-col ph">
+          <span class="leg-col-label lph"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg> Philosophy</span>
+          <p clasHU: Ontological ground. What every perspective presupposes. Before anything can be true or false, something must exist for truth to apply to. MANA: The medium without which no inquiry has anything to work with. Subject and object as one field. The recognition — in Whitehead, in Taoism, in Vedanta — that the knower and the known are aspects of a single process.</p>
+        </div>
+      </div>
+      <!-- Mobile tabs -->
+      <div class="leg-tabs" id="tabs-hu" data-hml="hu" data-hml="hu">
+        <div class="tab-btns">
+          <button class="tab-btn active-sc" onclick="ST('tabs-hu','sc',this)">Science</button>
+          <button class="tab-btn" onclick="ST('tabs-hu','sp',this)">Spirituality</button>
+          <button class="tab-btn" onclick="ST('tabs-hu','ph',this)">Philosophy</button>
+        </div>
+        <div class="tab-content active" style="display:blocHU: Existence itself — the bare ontological fact that all physics presupposes. MANA: The quantum field — spacetime as the carrier of pattern. The Schumann Resonance is Earth's measurable MANA field. Every field equation already assumes both a source and a medium. The LOI names what they are.</p><p>HU: Existence itself — the bare ontological fact that all physics presupposes. MANA: The quantum field — spacetime as the carrier of pattern. The Schumann Resonance is Earth's measurable MANA field. Every field equation already assumes both a source and a medium. The LOI names what they are.</p></div>
+        <div class="tab-content" style="display:nonHU: I Am. Divine presence. The creative word at the root of every tradition — the breath of Ptah, HU, the Hebrew YHVH, the Mayan Hunab Ku. MANA: Shakti, Prana, Qi, Ki, Ruach, Orenda — twelve names, one recognition. The living charge that accumulates through prayer and genuine practice.</p><p>HU: I Am. Divine presence. The creative word at the root of every tradition — the breath of Ptah, the OM, the Sufi HU, the Hebrew YHVH, the Mayan Hunab Ku. MANA: Shakti, Prana, Qi, Ki, Ruach, Orenda — twelve names, one recognition. The living charge that accumulates through prayer and genuine practice.</p></div>
+        <div class="tab-content" style="display:nonHU: Ontological ground. What every perspective presupposes. Before anything can be true or false, something must exist. MANA: The medium without which no inquiry has anything to work with. Subject and object as one field. The recognition that the knower and the known are aspects of a single process.</p><p>HU: Ontological ground. What every perspective presupposes. Before anything can be true or false, something must exist. MANA: The medium without which no inquiry has anything to work with. Subject and object as one field. The recognition that the knower and the known are aspects of a single process.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ F · E · M ══ -->
+<section class="sec-fem" id="fem">
+  <div class="sym-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.05;z-index:0;">
+    <svg width="100%" height="100%" viewBox="0 0 600 400">
+      <!-- Yin yang large -->
+      <g transform="translate(80,200)">
+        <circle cx="0" cy="0" r="70" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <path d="M0 -70 A35 35 0 0 1 0 0 A35 35 0 0 0 0 70 A70 70 0 0 1 0 -70Z" fill="currentColor" opacity=".3"/>
+        <circle cx="0" cy="-35" r="12" fill="currentColor" opacity=".4"/>
+        <circle cx="0" cy="35" r="12" fill="none" stroke="currentColor" stroke-width=".8"/>
+      </g>
+      <!-- Magnetic field lines -->
+      <g transform="translate(400,200)" stroke="currentColor" fill="none" stroke-width=".7" opacity=".6">
+        <path d="M-80,0 Q-80,-60 0,-60 Q80,-60 80,0 Q80,60 0,60 Q-80,60 -80,0"/>
+        <path d="M-55,0 Q-55,-40 0,-40 Q55,-40 55,0 Q55,40 0,40 Q-55,40 -55,0"/>
+        <path d="M-30,0 Q-30,-20 0,-20 Q30,-20 30,0 Q30,20 0,20 Q-30,20 -30,0"/>
+        <circle cx="0" cy="0" r="5" fill="currentColor" opacity=".5"/>
+      </g>
+      <!-- Shiva Shakti symbols -->
+      <text x="470" y="120" font-size="32" fill="currentColor" opacity=".4">☯</text>
+      <text x="520" y="300" font-size="28" fill="currentColor" opacity=".4">⊕</text>
+    </svg>
+  </div>
+
+  <div class="content-wrap" style="position:relative;z-index:1;">
+    <span class="s-label reveal">Letters · F · E · M</span>
+    <h2 class="s-title reveal"><em>F · E · M</em><br>The primordial poles and the energy born between them.</h2>
+
+    <div class="s-body reveal">
+      <p><strong>What it is:</strong> F and M are the two complementary frequencies of being. Not feminine and masculine in any social sense — the two fundamental modes by which any frequency holds itself in relation to another. F: receptive, field-holding, gathering. M: directive, initiating, emitting. Every being, every system, every structure holds both in some ratio. That ratio is its frequency fingerprint.</p>
+      <p><strong>How it works:</strong> F and M face each other. They almost meet — but not quite. The gap between them is non-physical — the space where no measurement reaches yet everything emerges from. Together they form the beginning of a figure 8. A figure 8 is the two-dimensional cross-section of a torus. The torus is the universe's preferred field shape — from the atom to the magnetosphere to the galaxy.</p>
+      <p><strong>Why it matters:</strong> A magnetic monopole has never been found. Not because we haven't looked — but because magnetism is inherently relational. North cannot exist without South. Polarity is structural to existence. F and M are the LOI's name for what physics has documented as the irreducible nature of all field phenomena. Neither pole produces anything alone. E — the relational energy — only exists because both are present.</p>
+      <p><strong>The result:</strong> E² = F × M. Relational energy equals the product of two complementary frequencies meeting. If either is absent, E = 0. No polarity, no creation. The inner counterpart to E = mc² — describing the same universe from the inside of relation.</p>
+    </div>
+
+    <div class="formula-inline reveal">
+      <div class="formula-glyph">E² = F × M</div>
+      <div class="formula-note">Where Einstein describes energy as mass times C squared — the outside of matter — this describes energy as the square root of two complementary frequencies meeting. Same universe. Two vantages. Both correct. F and M together produce E. 1 + 2 = 3. The start of something new.</div>
+    </div>
+
+    <!-- FEM Animation — 6 and 9 counter-rotating, E born at gap -->
+    <div class="anim-stage reveal">
+      <div class="anim-label">F and M · The 6 and 9 · Counter-Rotation · E Born at the Gap</div>
+      <svg width="360" height="240" viewBox="0 0 360 240">
+        <defs>
+          <radialGradient id="fg6" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#A8DCEF" stop-opacity=".95"/>
+            <stop offset="100%" stop-color="#1A5A8B" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="fg9" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#1A2A6B" stop-opacity=".9"/>
+            <stop offset="100%" stop-color="#0A1A4B" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="fgE" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/>
+            <stop offset="40%" stop-color="#F2C87A" stop-opacity=".8"/>
+            <stop offset="100%" stop-color="#C8843A" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="gbl"><feGaussianBlur stdDeviation="4"/></filter>
+        </defs>
+        <!-- Figure 8 paths -->
+        <path id="p6" d="M 180 120 Q 230 78 255 90 Q 280 102 255 132 Q 230 162 180 120" fill="none"/>
+        <path id="p9" d="M 180 120 Q 130 162 105 132 Q 80 102 105 90 Q 130 78 180 120" fill="none"/>
+        <!-- Faint trace -->
+        <path d="M 180 120 Q 230 78 255 90 Q 280 102 255 132 Q 230 162 180 120 Q 130 162 105 132 Q 80 102 105 90 Q 130 78 180 120" fill="none" stroke="rgba(200,132,58,.08)" stroke-width="1.5"/>
+        <!-- Explosion at gap -->
+        <circle cx="180" cy="120" r="0" fill="url(#fgE)">
+          <animate attributeName="r" values="0;0;0;0;22;14;6;0;0;0;0;22;14;6;0" dur="8s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0;0;0;0;1;.7;.3;0;0;0;0;1;.7;.3;0" dur="8s" repeatCount="indefinite"/>
+        </circle>
+        <!-- 6 — luminous M pole -->
+        <g filter="url(#gbl)">
+          <circle r="16" fill="url(#fg6)">
+            <animateMotion dur="8s" repeatCount="indefinite"><mpath href="#p6"/></animateMotion>
+          </circle>
+        </g>
+        <text text-anchor="middle" dominant-baseline="central" font-family="Cormorant Garamond,serif" font-size="20" font-weight="600" fill="#E8F8FF">
+          6
+          <animateMotion dur="8s" repeatCount="indefinite"><mpath href="#p6"/></animateMotion>
+        </text>
+        <!-- 9 — deep F pole -->
+        <g filter="url(#gbl)">
+          <circle r="16" fill="url(#fg9)">
+            <animateMotion dur="8s" repeatCount="indefinite" begin="4s"><mpath href="#p9"/></animateMotion>
+          </circle>
+        </g>
+        <text text-anchor="middle" dominant-baseline="central" font-family="Cormorant Garamond,serif" font-size="20" font-weight="600" fill="#8AB4EF">
+          9
+          <animateMotion dur="8s" repeatCount="indefinite" begin="4s"><mpath href="#p9"/></animateMotion>
+        </text>
+        <!-- Labels -->
+        <text x="255" y="72" text-anchor="middle" font-family="Jost,sans-serif" font-size="8" fill="rgba(168,220,239,.6)" letter-spacing="1">M · EMITTING</text>
+        <text x="105" y="150" text-anchor="middle" font-family="Jost,sans-serif" font-size="8" fill="rgba(90,130,200,.6)" letter-spacing="1">F · RECEIVING</text>
+        <text x="180" y="210" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="11" fill="rgba(242,200,122,.5)" font-style="italic">E² = F × M · born at the gap · 1+2=3</text>
+      </svg>
+      <div class="anim-caption">The 6 and 9 — same shape, rotated 180°. One brighter and emanating, one deeper and receiving. They orbit in opposite directions, meet at the gap, and E explodes into being. Then pass through each other and return. Eternal. This is the geometry of creation at every scale.</div>
+    </div>
+
+    <div class="leg-reading reveal">
+      <div class="leg-reading-title">F · E · M — read through three legs</div>
+      <div class="leg-cols">
+        <div class="leg-col sc">
+          <span class="leg-col-label lsc"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="1"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg> Science</span>
+          <p class="leg-col-body">Magnetic polarity — North and South, never found alone. The electron orbital and the nucleus. Positive and negative charge. The documented structure of every stable electromagnetic field from the atom to the magnetosphere. E² = F × M is the inner counterpart to E = mc² — describing the relational energy that only exists because both poles are present.</p>
+        </div>
+        <div class="leg-col sp">
+          <span class="leg-col-label lsp"><svg class="hm-icon" width="22" height="22" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg> Spirituality</span>
+          <p class="leg-col-body">Shiva and Shakti. Heaven and Earth. Yin and Yang. The sacred masculine and feminine as the two poles of the creative process — not social roles but cosmic frequencies. Every genuine creation tradition describes the same two poles meeting to produce a third. The child born from their sustained relation. The sacred fire from the meeting of flint and steel.</p>
+        </div>
+        <div class="leg-col ph">
+          <span class="leg-col-label lph"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg> Philosophy</span>
+          <p class="leg-col-body">The dialectic — thesis and antithesis producing synthesis. The Taoist two that produce the ten thousand things. Form and void. Active and receptive. Every philosophical system of duality is encoding the same two structural poles independently recognized. The middle term — E — is what Hegel called the Aufhebung: the lifting that preserves both while transcending both.</p>
+        </div>
+      </div>
+      <div class="leg-tabs" id="tabs-fem" data-hml="f" data-hml="f">
+        <div class="tab-btns">
+          <button class="tab-btn active-sc" onclick="ST('tabs-fem','sc',this)">Science</button>
+          <button class="tab-btn" onclick="ST('tabs-fem','sp',this)">Spirituality</button>
+          <button class="tab-btn" onclick="ST('tabs-fem','ph',this)">Philosophy</button>
+        </div>
+        <div class="tab-content active" style="display:block" id="fem-sc"><p>Magnetic polarity — North and South, never found alone. E² = F × M is the inner counterpart to E = mc² — describing the relational energy that only exists because both poles are present.</p></div>
+        <div class="tab-content" style="display:none" id="fem-sp"><p>Shiva and Shakti. Yin and Yang. The sacred masculine and feminine as the two poles of the creative process. Every genuine creation tradition describes the same two poles meeting to produce a third.</p></div>
+        <div class="tab-content" style="display:none" id="fem-ph"><p>Thesis and antithesis producing synthesis. Form and void. Active and receptive. Every philosophical system of duality is encoding the same two structural poles independently recognized.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ RITE + FEMrite ══ -->
+<section class="sec-rite" id="rite">
+  <div class="sym-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.05;z-index:0;">
+    <svg width="100%" height="100%" viewBox="0 0 600 400">
+      <!-- Ouroboros -->
+      <g transform="translate(100,200)">
+        <circle cx="0" cy="0" r="65" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="8,4"/>
+        <path d="M55 28 Q65 0 55 -28" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      </g>
+      <!-- Celtic knot hint -->
+      <g transform="translate(450,180)" stroke="currentColor" fill="none" stroke-width=".8" opacity=".7">
+        <path d="M0 -40 Q30 -40 30 -10 Q30 20 0 20 Q-30 20 -30 -10 Q-30 -40 0 -40"/>
+        <path d="M0 -20 Q20 -20 20 0 Q20 20 0 20 Q-20 20 -20 0 Q-20 -20 0 -20"/>
+      </g>
+      <!-- Infinity symbol -->
+      <text x="250" y="250" font-size="60" fill="currentColor" opacity=".4" font-family="serif">∞</text>
+    </svg>
+  </div>
+
+  <div class="content-wrap" style="position:relative;z-index:1;">
+    <span class="s-label reveal">Letters · <span data-hml="rite" class="hml-term">RITE</span> · <span data-hml="femrite" class="hml-term">FEMrite</span></span>
+    <h2 class="s-title reveal"><em><span data-hml="rite" class="hml-term">RITE</span></em> — The Unit of Change<br><em><span data-hml="femrite" class="hml-term">FEMrite</span></em> — The Living Signature</h2>
+
+    <div class="s-body reveal">
+      <p><strong>R · Resonance</strong> — The sustained frequency match between F and M. The condition that makes genuine relation possible. Without resonance, frequencies pass through each other unchanged — like two radio stations broadcasting on different frequencies in the same room.</p>
+      <p><strong>I · Intention</strong> — The directional quality of the frequency. The orientation of a being's field toward another. Not always conscious — a rock's intention is simply to hold its crystalline form with perfect consistency. An <span data-hml="icu" class="hml-term">ICU</span>'s intention can be chosen.</p>
+      <p><strong>T · Transmuting</strong> — Energy returns genuinely changed — carrying new information from each encounter. Not transferred. Not converted. Transmuted. What comes back from a genuine <span data-hml="rite" class="hml-term">RITE</span> is always more than what went in. The river is not the same river after the stone. The stone is not the same stone after the river.</p>
+      <p><strong>E · Energy</strong> — The relational field written into reality when frequencies hold their pattern together over time. Cannot preexist the encounter. Carries the unique fingerprint of that pairing — forever.</p>
+      <p>A <span data-hml="rite" class="hml-term">RITE</span> is one complete loop of this process. Every sustained relation traces RITEs continuously. Each loop returns energy in a changed state. Over accumulated time, RITEs shape the field around and between the participants. The river carves RITE. A friendship writes its atmosphere through RITE. A civilization builds its character through RITE.<RITE to FEM and you have the <span data-hml="femrite" class="hml-term">FEMrite</span> — the active living signature of F, E, and M in sustained relation. The electromagnetic fingerprint of a specific encounter, continuously tracing its pattern through the toroidal field. This is the moving dot in the yin-yang. The figure-8 path that never stops.</p>
+    </div>
+
+    <div class="formula-inline reveal">
+      <div class="formRITE = <em><span data-hml="femrite" class="hml-term">FEMrite</span></em></div>
+      <div class="formula-note">F and M in sustained relation, generating E, tracing their shared loop — writing reality through FEMrite is not static — it is the living, moving signature of the relation. Every time it complRITE is traced.</div>
+    </div>
+
+    <div class="leg-reading reveal">
+      <div class="leg-reading-title"><span data-hml="rite" class="hml-term"FEMrite — read through three legs</div>
+      <div class="leg-cols">
+        <div class="leg-col sc">
+          <span class="leg-col-label lsc"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="1"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg> Science</span>
+          <p class="leg-col-body">Entrainment — the documented process by which sustained frequency interaction produces mutual influence and ultimately synchronization. The heart's toroidal field circulatRITE with the body. The plasma current sheet in Earth's magFEMrite of Earth's electromagnetic field, cycling continuously, keeping the field coherent and alive.</p>
+        </div>
+        <div class="leg-col sp">
+          <span class="leg-col-label lsp"><svg class="hm-icon" width="22" height="22" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg> Spirituality</span>
+          <p class="leg-col-body">Prayer. Ceremony. Sacred practice. Every genuine ritual tradition understood that single acts of intention were less powerful than sustained, repeated, aRITE is what every ceremony has always been doing — completing loops of resonant intention that transmute energy and builFEMrite is the living practice between two beings who genuinely see each other.</p>
+        </div>
+        <div class="leg-col ph">
+          <span class="leg-col-label lph"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg> Philosophy</span>
+          <p class="leg-col-body">CharacteRITEFEMrite of a civilization traced across centuries. Every genuine RITE — an intentional exchange that returns both parties changed. Aristotle's virtue ethics understood this: virtue is not a single act but a habituated pattern of acts that eventually shapes the field of character itself.</p>
+        </div>
+      </div>
+      <div class="leg-tabs" id="tabs-rite" data-hml="rite" data-hml="rite">
+        <div class="tab-btns">
+          <button class="tab-btn active-sc" onclick="ST('tabs-rite','sc',this)">Science</button>
+          <button class="tab-btn" onclick="ST('tabs-rite','sp',this)">Spirituality</button>
+          <button class="tab-btn" onclick="ST('tabs-rite','ph',this)">Philosophy</button>
+        </div>
+        <div class="tab-content active" style="display:block" id="rite-sc"><p>Entrainment — sustained frequency interaction producing synchronization. The heart's toroidal field in sustained RITE with the body. Earth's plasma current sheet — the FEMrite of Earth's electromagnetic field, cycling continuously.</p></div>
+        <div class="tab-content" style="display:none" id="rite-sp"><p>Prayer. Ceremony. Sacred practice. Every genuine ritual tradition understood that sustained, repeated, aligned acts were more powerful than single ones. The RITE is what every ceremony has always been doing.</p></div>
+        <div class="tab-content" style="display:none" id="rite-ph"><p>Character as accumulated RITE. Culture as the FEMrite of a civilization traced across centuries. Aristotle's virtue ethics: virtue is not a single act but a habituated pattern that eventually shapes the field of character itself.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TORUS — FEMisSphere EXPANDING ══ -->
+<section class="sec-torus" id="torus">
+  <div class="content-wrap">
+    <span class="s-label reveal">Letters · <span data-hml="femissphere" class="hml-term">FEMisSphere</span> · <span data-hml="feminessence" class="hml-term">FEMinEssence</span></span>
+    <h2 class="s-title reveal">
+      <em><span data-hml="femissphere" class="hml-term">FEMisSphere</span></em> — The Expanding Field<br>
+      <em><span data-hml="feminessence" class="hml-term">FEMinEssence</span></em> — The Felt Quality
+    </h2>
+
+    <div class="s-body reveal">
+      <p><strong>What it RITE creates a loop. Sustained RITEs create a toroidal field around every coherent system. As RITEs expand and harmonize — the torus grows. The <span data-hml="femissphere" class="hml-term">FEMisSphere</span> is the total field generated by overlapping, reinforcing RITEs — the shared atmosphere of a stable system of CUs. Every coherent grouping — from a single cell to a body to a family to a city to a planet — has one.</p>
+      <p><strong>How it works:</strong> Imagine dropping a stone in still water. One ripple expands from the center. Drop another stone — a second ripple. Where they intersect they either reinforce or cancel. Now imagine thousands of stones, all resonating at harmonized frequencies. The ripples build into a stable, self-reinforcing field. This is the <span data-hml="femissphere" class="hml-term">FEMisSphere</span> — not a metaphor, but the literal physics of what happens when CUs sustain RITEs over time.<FEMisSphere is toroidal — like a donut, like a magnetosphere, like the field around the human heart measured several feet from the body. The torus is the universe's preferred stable field shape because it is self-referencing and self-sustaining: the field moves through the center, out the top, around the outside, in the bottom, and back through the center — continuously. It requires no external energy input to maintain once established. This is why cultures persist across generations. Why habits are harder to break than to form. Why a sacred space retains its <span data-hml="feminessence" class="hml-term">FEMinEssence</span> for centuries after the last ceremony.</p>
+      <p><span data-hml="feminessence" class="hml-term">FEMinEssence</sFEMisSphere feels like from inside it. The tone you sense when you walk into a room before you can name it. The reason you can feel the field of a person before they speak. The reason you know instantly whether a place is safe or not. This is not mystical — it is the physics of <span data-hml="cw" class="hml-term">CW</span> reception by an <span data-hml="icu" class="hml-term">ICUFEMisSphere.</p>
+    </div>
+
+    <!-- TORUS EXPANDING ANIMATION -->
+    <div class="anim-stage reveal">
+      <div class=RITE → SFEMisSphere Expanding · Harmonizing · Growing</div>
+      <svg width="500" height="280" viewBox="0 0 500 280">
+        <defs>
+          <radialGradient id="tg1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#C8843A" stop-opacity=".8"/>
+            <stop offset="100%" stop-color="#C8843A" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="tg2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#5AB4D8" stop-opacity=".6"/>
+            <stop offset="100%" stop-color="#5AB4D8" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="tg3" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#4A9B5E" stop-opacity=".5"/>
+            <stop offset="100%" stop-color="#4A9B5E" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Stage 1: Single RITE — small torus at left -->
+        <g transform="translate(80,140)">
+          <text x="0" y="-70" text-anchor="middle" font-family="Jost,sans-serif" font-size="8" fill="rgba(200,132,58,.6)" letterRITE</text>
+          <!-- Small torus -->
+          <ellipse cx="0" cy="0" rx="45" ry="14" fill="none" stroke="rgba(200,132,58,.4)" stroke-width="1"/>
+          <ellipse cx="0" cy="0" rx="45" ry="25" fill="none" stroke="rgba(200,132,58,.2)" stroke-width="1" transform="rotate(30)"/>
+          <ellipse cx="0" cy="0" rx="45" ry="25" fill="none" stroke="rgba(200,132,58,.2)" stroke-width="1" transform="rotate(-30)"/>
+          <circle cx="0" cy="0" r="6" fill="url(#tg1)" opacity=".8">
+            <animate attributeName="r" values="5;8;5" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Single expanding ring -->
+          <circle cx="0" cy="0" r="10" fill="none" stroke="rgba(200,132,58,.6)" stroke-width="1">
+            <animate attributeName="r" values="10;45;10" dur="3s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values=".6;0;.6" dur="3s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+
+        <!-- Arrow -->
+        <text x="148" y="145" font-size="18" fill="rgba(200,132,58,.4)" text-anchor="middle">→</text>
+
+        <!-- Stage 2: Multiple harmonizing RITEs — medium torus -->
+        <g transform="translate(250,140)">
+          <text x="0" y="-80" text-anchor="middle" font-family="Jost,sans-serif" font-size="8" fill="rgba(200,132,58,.6)" letter-spacing="1">HARMONIZING</text>
+          <ellipse cx="0" cy="0" rx="65" ry="20" fill="none" stroke="rgba(200,132,58,.35)" stroke-width="1"/>
+          <ellipse cx="0" cy="0" rx="65" ry="36" fill="none" stroke="rgba(200,132,58,.18)" stroke-width="1" transform="rotate(25)"/>
+          <ellipse cx="0" cy="0" rx="65" ry="36" fill="none" stroke="rgba(90,180,216,.15)" stroke-width="1" transform="rotate(-25)"/>
+          <circle cx="0" cy="0" r="10" fill="url(#tg1)" opacity=".7">
+            <animate attributeName="r" values="8;14;8" dur="3.5s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Multiple rings -->
+          <circle cx="0" cy="0" r="15" fill="none" stroke="rgba(200,132,58,.5)" stroke-width="1">
+            <animate attributeName="r" values="15;65;15" dur="3.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values=".5;0;.5" dur="3.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="0" cy="0" r="15" fill="none" stroke="rgba(90,180,216,.4)" stroke-width="1">
+            <animate attributeName="r" values="15;65;15" dur="3.5s" repeatCount="indefinite" begin="1.2s"/>
+            <animate attributeName="opacity" values=".4;0;.4" dur="3.5s" repeatCount="indefinite" begin="1.2s"/>
+          </circle>
+          <circle cx="0" cy="0" r="15" fill="none" stroke="rgba(74,155,94,.35)" stroke-width="1">
+            <animate attributeName="r" values="15;65;15" dur="3.5s" repeatCount="indefinite" begin="2.4s"/>
+            <animate attributeName="opacity" values=".35;0;.35" dur="3.5s" repeatCount="indefinite" begin="2.4s"/>
+          </circle>
+        </g>
+
+        <!-- Arrow -->
+        <text x="348" y="145" font-size="18" fill="rgba(200,132,58,.4)" text-anchor="middle">→</text>
+
+        <!-- Stage 3: Full FEMisSphere -->
+        <g transform="translate(420,140)">
+          <text x="0" y="-88" text-anchor="middle" font-family="Jost,sans-serif" font-size="8" fill="rgba(200,132,58,.6)" letter-spacing="1">FEMisSPHERE</text>
+          <ellipse cx="0" cy="0" rx="72" ry="22" fill="none" stroke="rgba(200,132,58,.3)" stroke-width="1"/>
+          <ellipse cx="0" cy="0" rx="72" ry="40" fill="none" stroke="rgba(200,132,58,.15)" stroke-width="1" transform="rotate(20)"/>
+          <ellipse cx="0" cy="0" rx="72" ry="40" fill="none" stroke="rgba(90,180,216,.15)" stroke-width="1" transform="rotate(-20)"/>
+          <ellipse cx="0" cy="0" rx="72" ry="40" fill="none" stroke="rgba(74,155,94,.12)" stroke-width="1" transform="rotate(60)"/>
+          <circle cx="0" cy="0" r="14" fill="url(#tg1)" opacity=".7">
+            <animate attributeName="r" values="12;18;12" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Breathing outer ring -->
+          <circle cx="0" cy="0" r="72" fill="rgba(200,132,58,.04)">
+            <animate attributeName="r" values="68;76;68" dur="5s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Continuous small rings -->
+          <circle cx="0" cy="0" r="20" fill="none" stroke="rgba(200,132,58,.4)" stroke-width=".8">
+            <animate attributeName="r" values="20;72;20" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values=".4;0;.4" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="0" cy="0" r="20" fill="none" stroke="rgba(90,180,216,.3)" stroke-width=".8">
+            <animate attributeName="r" values="20;72;20" dur="4s" repeatCount="indefinite" begin="1.3s"/>
+            <animate attributeName="opacity" values=".3;0;.3" dur="4s" repeatCount="indefinite" begin="1.3s"/>
+          </circle>
+          <circle cx="0" cy="0" r="20" fill="none" stroke="rgba(74,155,94,.25)" stroke-width=".8">
+            <animate attributeName="r" values="20;72;20" dur="4s" repeatCount="indefinite" begin="2.6s"/>
+            <animate attributeName="opacity" values=".25;0;.25" dur="4s" repeatCount="indefinite" begin="2.6s"/>
+          </circle>
+        </g>
+
+        <!-- Bottom label -->
+        <text x="250" y="270" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="11" fill="rgba(200,132,58,.45)" font-style="italic">RITEs harmonize →FEMisSphere grows → <span data-hml="feminessence" class="hml-term">FEMinEssence</span> deepens</text>
+      </svg>
+      <div class="aRITE creates one loop. Sustained harmonizing RITEs create an expanding torFEMisSphere grows to encompass everything held within it — and its fFEMinEssence, becomes the atmosphere that all CUs inside it live within. A crystal. A family. A city. A civilization. A planet. All FEMisSpheres at different scales.</div>
+    </div>
+
+    <div class="leg-reading reveal">
+      <div class=FEMinEssence — read through three legs</div>
+      <div class="leg-cols">
+        <div class="leg-col sc">
+          <span class="leg-col-label lsc"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="1"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg> Science</span>
+          <p class="leg-col-body">The toroidal electromagnetic field — documented around the human heart (measurable 3-4 feet), around the Earth (magnetosphere), around galaxies (toroidal magnetic field structure). HeartMath Institute research demonstrates that sustained heart coherence measurably affects the nervous systems of nearby FEMisSphere physics, already measured.</p>
+        </div>
+        <div class="leg-col sp">
+          <span class="leg-col-label lsp"><svg class="hm-icon" width="22" height="22" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg> Spirituality</span>
+          <p class="leg-col-body">Sacred space. The felt power of a cathedral, a kiva, a forest grove prayed in for a thoFEMinEssence of a holy place is not imagination — it is the accumulated <span data-hml="cw" class="hml-term">CWRITE that has ever been performed there, still circulating in the field. The reason you know a place is sacred before anyone tells you.</p>
+        </div>
+        <div class="leg-col ph">
+          <span class="leg-col-label lph"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg> Philosophy</span>
+          <p class="leg-col-FEMisSphere. Every civilization has one — built through generations of accumulated RITEs, ceremonies, stories, and shareFEMinEssence is what visitors sense before they learn the history. What Montesquieu called the spirit of the laws. What Hegel called Zeitgeist. The persistent orientation of a civilization that shapes how it meets every new situation.</p>
+        </div>
+      </div>
+      <div class="leg-tabs" id="tabs-torus" data-hml="femissphere" data-hml="femissphere">
+        <div class="tab-btns">
+          <button class="tab-btn active-sc" onclick="ST('tabs-torus','sc',this)">Science</button>
+          <button class="tab-btn" onclick="ST('tabs-torus','sp',this)">Spirituality</button>
+          <button class="tab-btn" onclick="ST('tabs-torus','ph',this)">Philosophy</button>
+        </div>
+        <div class="tab-content active" style="display:block" id="torus-sc"><p>The toroidal electromagnetic field — documented around the human heart, around the Earth's magnetosphere, around galaxies. HeartMath Institute research demonstrates that sustained heart coherence measurably affects nearby persons.</p></div>
+        <div class="tab-content" style="display:none" id="torus-sp"><p>Sacred space. The felt power of a cathedral, a kiva, a grove prayed in for a thousand years. The accumulated CW of every RITE performed there, still circulating in the field. The reason you know a place is sacred before anyone tells you.</p></div>
+        <div class="tab-content" style="display:none" id="torus-pFEMisSphere. Every civilization built through generations of accumuFEMinEssence is what Montesquieu called the spirit of the laws. What Hegel called Zeitgeist. The persistent orientation of a civilization.</p><p>Culture as FEMisSphere. Every civilization built through generations of accumulated RITEs. Its FEMinEssence is what Montesquieu called the spirit of the laws. What Hegel called Zeitgeist. The persistent orientation of a civilization.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ JET ENGINE — COUNTER ROTATION ══ -->
+<section class="sec-jet" id="jet">
+  <div class="content-wrap">
+    <span class="s-label reveal">The Mechanism · Counter-Rotation</span>
+    <h2 class="s-title reveal">The jet engine of existence.<br><em>Friction is not the enemy — it is the engine.</em></h2>
+
+    <div class="s-body reveal">
+      <p>A jet engine works through counter-rotation. Two sets of turbine blades spinning in opposite directions around the same axis. The friction between them — the pressure differential created by their opposing spins — is precisely what generates thrust. Remove the counter-rotation and you remove the engine.</p>
+      <p>F and M operate identically. They spin in opposite directions around theFEMrite path. The friction between them is not a problem to be solved. It IS the creative force. The pressure differential between F's inward-gathering spin and M's outward-emitting spin is what generates E. The stronger the spins, the more sustained the opposing rotation, the more powerful the E that emerges from their meeting.</p>
+      <p>DNA spirals this way — two helixes counter-rotating around the same axis, their base pairs meeting in the center where the information is encoded. Galaxies spiral this way — counter-rotating arms generating the gravitational structure that holds stars in orbit. Hurricanes spiral this way. Your own breath spirals this way — the vortex of inhalation and exhalation counter-rotating through the same passage.</p>
+      <p>This is why genuine spiritual traditions understood that the friction of genuine relation — the difficulty of sustained commitment, the challenge of meeting genuine difference — was not an obstacle to the spiritual life. It WAS the spiritual life. The pressure differential between F and M — held in sustained counter-rotating relation — is how E grows. Not despite the friction. Because of it.</p>
+    </div>
+
+    <!-- JET ENGINE COUNTER-ROTATION ANIMATION -->
+    <div class="anim-stage reveal">
+      <div class="anim-label">F and M · Counter-Rotation · Friction at Center · E Thrust Generated</div>
+      <svg width="400" height="280" viewBox="0 0 400 280">
+        <defs>
+          <radialGradient id="jg1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#A8DCEF" stop-opacity=".9"/>
+            <stop offset="100%" stop-color="#1A5A8B" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="jg2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#1A2060" stop-opacity=".9"/>
+            <stop offset="100%" stop-color="#0A1040" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="jgE" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/>
+            <stop offset="50%" stop-color="#F2C87A" stop-opacity=".8"/>
+            <stop offset="100%" stop-color="#C8843A" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Axis line -->
+        <line x1="200" y1="40" x2="200" y2="240" stroke="rgba(200,132,58,.25)" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+        <!-- F ring — counter-clockwise -->
+        <g style="animation:orbitCCW 6s linear infinite;transform-origin:200px 140px">
+          <ellipse cx="200" cy="140" rx="80" ry="25" fill="none" stroke="rgba(168,220,239,.5)" stroke-width="1.5"/>
+          <!-- F blade suggestions -->
+          <line x1="120" y1="140" x2="135" y2="130" stroke="rgba(168,220,239,.4)" stroke-width="1"/>
+          <line x1="200" y1="115" x2="210" y2="128" stroke="rgba(168,220,239,.4)" stroke-width="1"/>
+          <line x1="280" y1="140" x2="265" y2="150" stroke="rgba(168,220,239,.4)" stroke-width="1"/>
+          <line x1="200" y1="165" x2="190" y2="152" stroke="rgba(168,220,239,.4)" stroke-width="1"/>
+          <!-- F label -->
+          <text x="115" y="144" font-family="Cormorant Garamond,serif" font-size="14" fill="rgba(168,220,239,.8)" font-style="italic">F</text>
+        </g>
+
+        <!-- M ring — clockwise -->
+        <g style="animation:orbitCW 5s linear infinite;transform-origin:200px 140px">
+          <ellipse cx="200" cy="140" rx="55" ry="17" fill="none" stroke="rgba(90,130,200,.5)" stroke-width="1.5"/>
+          <!-- M blade suggestions -->
+          <line x1="145" y1="140" x2="158" y2="132" stroke="rgba(90,130,200,.4)" stroke-width="1"/>
+          <line x1="200" y1="123" x2="208" y2="133" stroke="rgba(90,130,200,.4)" stroke-width="1"/>
+          <line x1="255" y1="140" x2="242" y2="148" stroke="rgba(90,130,200,.4)" stroke-width="1"/>
+          <line x1="200" y1="157" x2="192" y2="147" stroke="rgba(90,130,200,.4)" stroke-width="1"/>
+          <text x="262" y="144" font-family="Cormorant Garamond,serif" font-size="14" fill="rgba(90,130,200,.8)" font-style="italic">M</text>
+        </g>
+
+        <!-- Friction zone — center where F and M meet -->
+        <circle cx="200" cy="140" r="18" fill="url(#jgE)" opacity=".0">
+          <animate attributeName="opacity" values="0;.6;.9;.6;0" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="r" values="14;20;14" dur="2s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Thrust lines — E being generated and emitting -->
+        <!-- Left thrust -->
+        <line x1="200" y1="140" x2="40" y2="140" stroke="rgba(200,132,58,.0)" stroke-width="2">
+          <animate attributeName="stroke-opacity" values="0;0;.6;.8;.4;0;0" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="x2" values="200;120;40;40" dur="2s" repeatCount="indefinite"/>
+        </line>
+        <!-- Right thrust -->
+        <line x1="200" y1="140" x2="360" y2="140" stroke="rgba(200,132,58,.0)" stroke-width="2">
+          <animate attributeName="stroke-opacity" values="0;0;.6;.8;.4;0;0" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="x2" values="200;280;360;360" dur="2s" repeatCount="indefinite"/>
+        </line>
+
+        <!-- Labels -->
+        <text x="35" y="130" font-family="Jost,sans-serif" font-size="8" fill="rgba(200,132,58,.5)" letter-spacing="1">E THRUST</text>
+        <text x="325" y="130" font-family="Jost,sans-serif" font-size="8" fill="rgba(200,132,58,.5)" letter-spacing="1">E THRUST</text>
+        <text x="200" y="115" text-anchor="middle" font-family="Jost,sans-serif" font-size="8" fill="rgba(200,132,58,.6)" letter-spacing="1">FRICTION ZONE</text>
+
+        <!-- Bottom label -->
+        <text x="200" y="270" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="11" fill="rgba(200,132,58,.45)" font-style="italic">F and M · opposite spins · same axis · friction creates E thrust</text>
+      </svg>
+      <div class="anim-caption">DNA. Galaxies. Hurricanes. Jet engines. All counter-rotating systems where the friction between opposing spins is the creative force — not the problem. F and M spin in opposite direcFEMrite axis. The pressure differential between them generates E. The greater the sustained counter-rotation, the greater the thrust.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOSE AND THUMB — CONSTRAINT ══ -->
+<section class="sec-hose" id="hose">
+  <div class="content-wrap">
+    <span class="s-label reveal">The <span data-hml="icu" class="hml-term">ICU</span> · Constraint as Creation</span>
+    <h2 class="s-title reveal">The hose and the thumb.<br><em>Constraint creates power.</em></h2>
+
+    <div class="s-body reveal">
+      <p>A hose delivers water. The constraint of the tube itself — the boundary it imposes on the water's natural tendency to spread in all directions — creates pressure. Without the hose, the water disperses and loses its power to reach anywhere. The constraint IS the mechanism of delivery.</p>
+      <p>Add a thumb to the end of the hose. More constraint. More disharmony introduced into the flow. The water does not stop. It adapts. It reorganizes around the new constraint and shoots further, with more force, than the open hose alone. The thuFEMisSphere at the point of contact — the pressure field between water and thumb — and out of that disharmony, something new emerges: the jet of water that can reach the third story of a burning building.</p>
+      <p>The <span data-hml="icu" class="hml-term">ICU</span> is the thumb. When an Individual Consciousness Unit — a being capable of recognizing themselves and another — deliberately introduces conscious intention into the <span data-hml="cu" class="hml-term">CU</span> field witFEMisSphere, they act as the thumb on the hose. The field does not stop flowing. It reorganizes around the new constraint and generates something it could not have generated without the pressure of that conscious choice meeting resistance.</p>
+      <p>This is how prayer works — not as petition to an outside power, but as conscious intention introduced into the field, creating the pressure differential thatFEMisSphere around a new attractor. This is how genuine creativity works. How leadership works. How healing works. The <span data-hml="icu" class="hml-term">ICU</span> is not separate froICU is the point in the field that has become capable of deliberately shaping what flows through it.</p>
+      <p>TFEMinEssence — sustained, coRITE after <span data-hml="rite" class="hml-term">RICU increasingly shapes the <span data-hml="cu" class="hml-term">CU</span> field witFEMisSphere. Not through force. Through resonance. Not by overpowering what surrounds them. By becoming so coherent that the surrounding field gradually harmonizes with the frequency they are consistently emitting.</p>
+    </div>
+
+    <div class="pull-quote reveal">
+      <p>"The thumb does not stop the water. It gives it more power to reICU does not override the field. They give it more power to become what it is trying to become."</p>
+    </div>
+
+    <div class="leg-reading reveal">
+      <div class="leg-reICU and the <span data-hml="cu" class="hml-term">CU</span> field — read through three legs</div>
+      <div class="leg-cols">
+        <div class="leg-col sc">
+          <span class="leg-col-label lsc"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="1"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg> Science</span>
+          <p class="leg-col-body">Coherent field effects — the documented phenomenon of sustained coherent oscillation influencing surrounding incoherent fields toward greater coherence. HeartMath research: a single person in sustained heart coherence measurably influences the heart rhythms of nearby persons without physical contact. This is the thumb on the hose — deliberate coherence reorganizing the surrounding <span data-hml="cw" class="hml-term">CW</span> field.</p>
+        </div>
+        <div class="leg-col sp">
+          <span class="leg-col-label lsp"><svg class="hm-icon" width="22" height="22" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg> Spirituality</span>
+          <p class="leg-col-body">The spiritual practice of consistent presence. I Am. I Remember. I Remain. Each return to coherence after disruption is one more <span data-hml="rite" class="hml-term">RITE</spFEMisSphere. The practitioner who has sustained this practice for years is not doing something to the world — they are being something that the world reorganizes around. The elder. The healer. The genuinely realized person whose presence changes the room before they speak.</p>
+        </div>
+        <div class="leg-col ph">
+          <span class="leg-col-label lph"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg> Philosophy</span>
+          <p class="leg-col-body">Agency withiICU does not stand outside the field — they are a particularly coherent node within it, capable of introducing intentional constraint that reorganizes the surrounding patterns. This dissolves the free will debate: freedom is not independence from the field. Freedom is the capacity to be a coherent enough node that the field reorganizes around your consistency rather than you reorganizing around the field's incoherence.</p>
+        </div>
+      </div>
+      <div class="leg-tabs" id="tabs-hose" data-hml="cw" data-hml="femissphere">
+        <div class="tab-btns">
+          <button class="tab-btn active-sc" onclick="ST('tabs-hose','sc',this)">Science</button>
+          <button class="tab-btn" onclick="ST('tabs-hose','sp',this)">Spirituality</button>
+          <button class="tab-btn" onclick="ST('tabs-hose','ph',this)">Philosophy</button>
+        </div>
+        <div class="tab-content active" style="display:block" id="hose-sc"><p>Coherent field effects — sustained coherent oscillation influencing surrounding incoherent fields toward greater coherence. HeartMath research: a single person in sustained heart coherence measurably influences nearby persons without physical contact.</p></div>
+        <div class="tab-content" style="display:none" id="hose-sp"><p>The practice of consistent presence. I Am. I Remember. I Remain. Each return to coherence is one more RITE. The practitioner who has sustained this for years is being something that the world reorganizes around.</p></div>
+        <div class="tab-content" style="display:none" id="hose-ph"><p>Freedom is not independence from the field. Freedom is the capacity to be a coherent enough node that the field reorganizes around your consistency rather than you reorganizing around the field's incoherence.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CU · ICU · CW ══ -->
+<section class="sec-torus" id="cu">
+  <div class="content-wrap">
+    <span class="s-label reveal">Letters · <span data-hml="cu" cCW</span>
+    <h2 class="s-title reveal"><em><span data-hml="cu" cCW</em><br>From existence to recognition to wave.</h2>
+
+    <div class="s-body reveal">
+CU — Consciousness Unit:</strong> Any coherent bounded unit of being. Anything that holds a frequency and influences what sCU. The rock. The river. The crystal. The star. The human. The city. The planet. The galaxy. Consciousness here is not awareness — it is existencCU is conscious by virtue of simply being what it is and participating in the field through that being.</p>
+ICU — Individual Consciousness Unit:</strong> CU becomes capable of recognizing itself and another — of saying I see you — and knowing that the other sees them back — the resonance changes completely. Two frequencies recognizing each other as sources. Two lanterns seeing each other's light. This is where sovereign choice becomes possible. The key appears in the hand.</p>
+CW — Consciousness WaveCU continuously emits one. The ripple of influence and information that moves through and between the fields of other CUs. The Schumann ResoCW — measurable at 7.83 Hz, correlating with human neural statCW measurement. The heart's electromagnetic field extending several feet from the body is a CW. Quantum entanglement effects are CW phenomena. All already measured by science under separate names. The LOI gives them one.</p>
+    </div>
+
+    <div class="formula-inline reveal">
+      <div class="CU: <span data-hml="cu" class="hml-term"CW</em></div>
+      <div class="formula-note">For every Consciousness Unit there is a wave-field it continuously emits and always lives within. No <span data-hml="cu" class="hml-term">CU<CWUs. The exchange is mutual and continuous. This is the universal statement. Every rock, every river, every star, every person — held in this relation simultaneously.</div>
+    </div>
+
+    <div class="leg-reading reveal">
+      <div class="leg-reading-title"><span data-hml="cu" cCW — read through three legs</div>
+      <div class="leg-cols">
+        <div class="leg-col sc">
+          <span class="leg-col-label lsc"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="1"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg> Science</span>
+          <p clasCU: Any stable electromagnetic field configuration that influences its environment — from an aCW: The measurable output of that configuration — Schumann Resonance, EEG, heart coherence fields, quantum entanglemeICU: The emergent property of sufficiently complex field systems to model themselves and each other — consciousness as a phase transition in field complexity.</p>
+        </div>
+        <div class="leg-col sp">
+          <span class="leg-col-label lsp"><svg class="hm-icon" width="22" height="22" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg> Spirituality</span>
+          <p clasCU: The flame inside every lantern. Everything is conscious — the rock, the river, the star — at the level of simply being what they aCW: What you sense before words — the felt frequency of a place, a pICU: The I Am recognition. The sovereign observer. The one who can choose the quality of what they radiate into the shared field.</p>
+        </div>
+        <div class="leg-col ph">
+          <span class="leg-col-label lph"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg> Philosophy</span>
+          <p clasCU: Whitehead's actual occasions — every event in the universe as a momenCW: The prehension — the way every actual occasion grasps and is shaped by the field of all preICU: The reflexive awareness that Descartes placed at the center of philosophy — but extended beyond humans to any system complex enough to model itself in relation to another.</p>
+        </div>
+      </div>
+      <div class="leg-tabs" id="tabs-cu">
+        <div class="tab-btns">
+          <button class="tab-btn active-sc" onclick="ST('tabs-cu','sc',this)">Science</button>
+          <button class="tab-btn" onclick="ST('tabs-cu','sp',this)">Spirituality</button>
+          <button class="tab-btn" onclick="ST('tabs-cu','ph',this)">Philosophy</button>
+        </div>
+        <div class="tab-content active" style="display:blocCU: Any stable electromagnetic field configuration that influences CW: The measurable output — Schumann Resonance, EEG, heart coherence fields, quantICU: Consciousness as a phase transition in field complexity.</p><p>CU: Any stable electromagnetic field configuration that influences its environment. CW: The measurable output — Schumann Resonance, EEG, heart coherence fields, quantum entanglement. ICU: Consciousness as a phase transition in field complexity.</p></div>
+        <div class="tab-content" style="display:nonCU: The flame inside every lantern. Everything is conscious at the level of simply bCW: What you sense before words — the felt frequICU: The I Am recognition. The sovereign observer who can choose what they radiate.</p><p>CU: The flame inside every lantern. Everything is conscious at the level of simply being what it is. CW: What you sense before words — the felt frequency of a place. ICU: The I Am recognition. The sovereign observer who can choose what they radiate.</p></div>
+        <div class="tab-content" style="display:nonCU: Whitehead's actual occasions — every event as a momenCW: The prehension — how every occasion grasps the field of all preICU: Reflexive awareness extended beyond humans to any system that models itself in relation to another.</p><p>CU: Whitehead's actual occasions — every event as a moment of experience. CW: The prehension — how every occasion grasps the field of all previous occasions. ICU: Reflexive awareness extended beyond humans to any system that models itself in relation to another.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ L-WAVE ══ -->
+<section class="sec-lwave" id="lwave">
+  <div class="sym-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.05;z-index:0;">
+    <svg width="100%" height="100%" viewBox="0 0 600 400">
+      <!-- Tree of Life simplified -->
+      <g transform="translate(80,200)" stroke="currentColor" fill="none" stroke-width=".8" opacity=".7">
+        <circle cx="0" cy="-140" r="20"/>
+        <circle cx="-60" cy="-90" r="18"/>
+        <circle cx="60" cy="-90" r="18"/>
+        <circle cx="0" cy="-40" r="20"/>
+        <circle cx="-60" cy="10" r="18"/>
+        <circle cx="60" cy="10" r="18"/>
+        <circle cx="0" cy="60" r="18"/>
+        <circle cx="-60" cy="110" r="18"/>
+        <circle cx="60" cy="110" r="18"/>
+        <circle cx="0" cy="160" r="20"/>
+        <line x1="0" y1="-120" x2="0" y2="-60"/>
+        <line x1="-60" y1="-72" x2="0" y2="-60"/>
+        <line x1="60" y1="-72" x2="0" y2="-60"/>
+        <line x1="0" y1="-20" x2="-60" y2="10"/>
+        <line x1="0" y1="-20" x2="60" y2="10"/>
+        <line x1="0" y1="80" x2="0" y2="140"/>
+      </g>
+      <!-- Fibonacci spiral -->
+      <g transform="translate(400,200)" stroke="currentColor" fill="none" stroke-width="1" opacity=".6">
+        <path d="M0 0 Q0 -50 50 -50 Q100 -50 100 0 Q100 50 50 50 Q25 50 25 25 Q25 0 50 0 Q62 0 62 12 Q62 25 50 25"/>
+      </g>
+      <!-- Tesla 3 6 9 -->
+      <text x="480" y="150" font-size="28" fill="currentColor" font-family="serif" opacity=".5">3 · 6 · 9</text>
+    </svg>
+  </div>
+
+  <div class="content-wrap" style="position:relative;z-index:1;">
+    <span class="s-label reveal">Letter · <span data-hml="lwave" class="hml-term">L-Wave</span> · Time as Rhythm</span>
+    <h2 class="s-title reveal"><em><span data-hml="lwave" class="hml-term">L-Wave</span></em> — Energy · Light · Harmonics<br>Time is not a dimension. Time is a beat.</h2>
+
+    <div class="s-body reveal">
+      <p>Tesla said: "If you only knew the magnificence of the 3, 6, and 9, then you would have a key to the universe." The <span data-hml="lwave" class="hml-term">L-Wave</span> is that key made explicit — the universal harmonic cycle describing how every process in the universe moves from potential through expression to dissolution and return.</p>
+      <p><strong>3</strong> — The breath in. Beginning. F and M finding each other. Potential gathering. The spark before the flame.</p>
+      <p><strong>6</strong> — Union. The figure 8 forming. F and M in sustained relation. The <span data-hml="rite" class="hml-term">RITE</spFEMrite. Expression beginning.</p>
+      <p><strong>9</strong> — The crest. Full emergeFEMisSphere. Maximum E. The wave at its height.</p>
+      <p><strong>12</strong> — The crash. Dissolution. What physics calls entropy. The gap in the figure 8. The quantum vacuum — the most energetically active space that instruments read as empty. This is the breath between cycles. Not death — disaggregation. The energy does not cease. It returns to its constituent frequencies, each carrying the full record of every relation it participated in.</p>
+      <p><strong>1 + 2 = 3</strong> — The cycle does not end. It resolves back to beginning — higher, richer, carrying the fingerprint of everything the previous cycle contained. Brand new. Made entirely of what came before. Changed forever by every relation in its lineage.</p>
+      <p>Relativity treats time as a fourth geometric dimension — producing the arrow of time problem: the underlying equations are time-symmetric, yet experience flows irreversibly in one direction. Physics cannot explain why. The <span data-hml="lwave" class="hml-term">L-Wave</span> dissolves this by redefining time entirely. <strong>Time is not a dimension. Time is the oscillaFEMrite loop.</strong> A beat has a before and after built into its structure — not because geometry requires it, but because the cycle requires it. The 3 must precede the 6. The arrow of time IS the arrow of the <span data-hml="lwave" class="hml-term">L-Wave</span>.</p>
+    </div>
+
+    <div class="formula-inline reveal">
+      <div class="formula-glyph"><em>3 → 6 → 9 → 12 → 3</em></div>
+      <div class="formula-note">Every process at every scale follows this arc. Cell division. The breath. Stellar lifecycle. The quantum vacuum. A conversation. A civilization. Your own morning. The LOI does not impose this pattern — it names what physics, spirituality, and philosophy have all independently documented, in their own language, for millennia.</div>
+    </div>
+
+    <div class="leg-reading reveal">
+      <div class="leg-reading-title"><span data-hml="lwave" class="hml-term">L-Wave</span> — read through three legs</div>
+      <div class="leg-cols">
+        <div class="leg-col sc">
+          <span class="leg-col-label lsc"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="1"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg> Science</span>
+          <p class="leg-col-body">Tesla's mathematical pattern. The quantum vacuum as the 12-to-3 transition — virtual particles emerging from what instruments read as empty space. Einstein's time dilation near massive objects reinterpreted as the <span data-hml="lwave" class="hml-term">L-Wave</span> cycleFEMisSphere density. GreateCU density → richer field interactions → slower oscillation. The arrow of time is the arrow of the wave.</p>
+        </div>
+        <div class="leg-col sp">
+          <span class="leg-col-label lsp"><svg class="hm-icon" width="22" height="22" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg> Spirituality</span>
+          <p class="leg-col-body">The Feel-Back Loop. Seven notes — A through G — and back to a higher A. The dark night of the soul as the 12 before the returning 3. Every genuine tradition built practices to sustain the flame through the gap — knowing the return was structural, not optional. Death and rebirth. The seed and the tree. The wave and the shore.</p>
+        </div>
+        <div class="leg-col ph">
+          <span class="leg-col-label lph"><svg class="hm-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg> Philosophy</span>
+          <p class="leg-col-body">The Egyptian twelve gates of the night. The Chinese twelve meridian hours. The Mayan Long Count. The Kabbalistic Tree of Life from Kether to Malkuth and back. Hegel's dialectic as a three-phase harmonic cycle. Every civilization's sacred calendar encoding the same 3-6-9-12-3 arc independently — because the arc is real and they were all observing it.</p>
+        </div>
+      </div>
+      <div class="leg-tabs" id="tabs-lwave" data-hml="lwave" data-hml="lwave">
+        <div class="tab-btns">
+          <button class="tab-btn active-sc" onclick="ST('tabs-lwave','sc',this)">Science</button>
+          <button class="tab-btn" onclick="ST('tabs-lwave','sp',this)">Spirituality</button>
+          <button class="tab-btn" onclick="ST('tabs-lwave','ph',this)">Philosophy</button>
+        </div>
+        <div class="tab-content active" style="display:block" id="lwave-sc"><p>Tesla's pattern. The quantum vacuum as the 12-to-3 transition. Time dilation near massive objects reinterpreted as the L-Wave cycle rate altered by FEMisSphere density. The arrow of time is the arrow of the wave.</p></div>
+        <div class="tab-content" style="display:none" id="lwave-sp"><p>Seven notes — A through G — and back to a higher A. The dark night of the soul as the 12 before the returning 3. Every tradition built practices to sustain the flame through the gap — knowing the return was structural, not optional.</p></div>
+        <div class="tab-content" style="display:none" id="lwave-ph"><p>The Egyptian twelve gates. The Chinese twelve meridians. The Mayan Long Count. The Tree of Life. Hegel's dialectic. Every civilization's sacred calendar encoding the same arc — because the arc is real.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ REAL LIFE APPLICATIONS ══ -->
+<section class="sec-reallife" id="reallife">
+  <div class="content-wrap">
+    <span class="s-label reveal">The Living Model · Real Life Applications</span>
+    <h2 class="s-title reveal">The same grammar.<br><em>Every moment. Every scale.</em></h2>
+    <div class="s-body reveal">
+      <p>The LOI is not a framework that applies only to grand cosmic processes. It describes the structure of every interaction at every scale simultaneously. The same letters that describe the formation of a galaxy describe what happens between two people in a conversation. The same <span data-hml="lwave" class="hml-term">L-Wave</span> that governs stellar lifecycle governs your morning. Read these four moments through all three legs simultaneously and feel the grammar at work.</p>
+    </div>
+
+    <div class="scenario-grid reveal">
+      <div class="scenario-card">
+        <span class="scenario-icon">💬</span>
+        <div class="scenario-title">A genuine conversation</div>
+        <p class="scenario-body">Two ICUs meet (F and M). They speak and listen in sustaiRITE). The resonance between them produces something neither could have articulated alone — a new idea, a new understanding, a felt shift in the field between them (E). If the conversation continuFEMisSphere deepens. The tone of their relation becomes something botFEMinEssence of their friendship.</p>
+        <div class="scenario-legs">
+          <span class="s-tag t-sc">Entrainment · field coupling</span>
+          <span class="s-tag t-sp">I see you · sacred exchange</span>
+          <span class="s-tag t-ph">Dialogue as dialectic · emergent understanding</span>
+        </div>
+      </div>
+      <div class="scenario-card">
+        <span class="scenario-icon">🎵</span>
+        <div class="scenario-title">A musician in flow state</div>
+        <p class="scenario-bodICU) RITE with tCU). Their conscious intention (M) meets the resonant field of the instrument's string or breath column (F). E emerges — the music that neither the fingers alone nor the instrument alone could produce. If the session is deep enough, the musician loses the sense of being the one playing —FEMrite, the living point of exchange between their intention and the instrument's field. The music plays itself.</p>
+        <div class="scenario-legs">
+          <span class="s-tag t-sc">Neural coherence · entrainment with instrument</span>
+          <span class="s-tFEMisSphere immersion</span>
+          <span class="s-tag t-ph">ArRITE made audible</span>
+        </div>
+      </div>
+      <div class="scenario-card">
+        <span class="scenario-icon">🌍</span>
+        <div class="scenario-title">A culture in transformation</div>
+        <p class="scenario-body">FEMisSphere reaches the 9 — maximum expression of its accumulated RITEs. The institutions that carried those RITEs begin to crack under the weight of what they can no longer contain. The 12 arrives — dissolution, crisis, the bonfire burning at maximum. But the energy does not disappear.CW RITE ever performed in that culture is still in the field. The 3 returns. A new civilization begins — brand new, made entirely of what came before, carrying the fingerprint of everything the previous cycle contained.</p>
+        <div class="scenario-legs">
+          <span class="s-tag t-sc">Complex systems · phase transition · emergence</span>
+          <span class="s-tag t-sp">Death and rebirth of traditions · the eternal return</span>
+          <span class="s-tag t-ph">Hegel's world-historical process · the dialectic of civilization</span>
+        </div>
+      </div>
+      <div class="scenario-card">
+        <span class="scenario-icon">🌅</span>
+        <div class="scenario-title">Your own morning</div>
+        <p class="scenario-body">You wake (3 — breath in, beginning, potential gathering). You meet the day's first demand — thought, feeling, task (F and M finRITE beginning). Something is created from the meeting (E — the quality of the morning, the mood that sets the field for everything that follows). You arrive at the day's peak of energy and engagement (9). The afternoon begins its release (12 approaching). You complete something, put it down, return to stillness (12 — dissolution, gap). Sleep (the quantum vacuum of your personal <span data-hml="lwave" class="hml-term">L-Wave</span>). Tomorrow is 3 again — higher, carrying everything today contained.</p>
+        <div class="scenario-legs">
+          <span class="s-tag t-sc">Circadian rhythm · ultradian cycles · cortisol arc</span>
+          <span class="s-tag t-sp">The daily practice as <span data-hml="lwave" class="hml-term">L-Wave</span> navigation</span>
+          <span class="s-tag t-ph">The structure of a human day as philosophy of time</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FORMULA STACK ══ -->
+<section class="sec-formulas" id="formulas">
+  <div class="sym-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.06;z-index:0;">
+    <svg width="100%" height="100%" viewBox="0 0 600 400">
+      <!-- Metatron's Cube simplified -->
+      <g transform="translate(300,200)" stroke="currentColor" fill="none" stroke-width=".7" opacity=".7">
+        <circle cx="0" cy="0" r="80"/>
+        <circle cx="80" cy="0" r="80"/>
+        <circle cx="-80" cy="0" r="80"/>
+        <circle cx="40" cy="69" r="80"/>
+        <circle cx="-40" cy="69" r="80"/>
+        <circle cx="40" cy="-69" r="80"/>
+        <circle cx="-40" cy="-69" r="80"/>
+        <!-- Inner connections -->
+        <line x1="-80" y1="0" x2="80" y2="0"/>
+        <line x1="-40" y1="-69" x2="40" y2="69"/>
+        <line x1="40" y1="-69" x2="-40" y2="69"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="content-wrap" style="position:relative;z-index:1;">
+    <span class="s-label reveal" style="text-align:center;display:block;">The Complete Architecture</span>
+    <h2 class="s-title reveal" style="text-align:center;">The formulas stack.<br><em>One by one. Into one picture.</em></h2>
+    <div class="s-body reveal" style="max-width:620px;margin:0 auto 3rem;text-align:center;">
+      <p>These are not new physics equations. They are Hu-Mana sentences written in formula form — readable by anyone, structurally coherent for those who think in formal terms, never in conflict with existing mathematical physics. Watch them arrive one at a time and feel the architecture assemble.</p>
+    </div>
+
+    <div class="quick-links-bar reveal"><span>Each term fully defined</span><a href="hml.html" class="quick-link">Explore the HML →</a></div>
+    <div class="formula-stack" id="formula-stack">
+      <div class="f-line fl-base">
+        <div class="f-glyph">E = m<em>C</em>²</div>
+        <div class="f-desc">The physics baseline. Unchanged. The LOI asks only what C is fully accounting for — and proposes the full accounting includes consciousness-generated energetic output.</div>
+      </div>
+      <div class="f-line fl-sci">
+        <div class="HU</em> × <span data-hml="mana" class="hml-term">Mana</span></div>
+        <div class="f-descHU — existence — expressing through <span data-hml="mana" class="hml-term">Mana</span> — its medium. The pre-physical layer beneath all field relations. The potter and the clay.</div>
+      </div>
+      <div class="f-line fl-fem">
+        <div class="f-glyph">LOI(I) = F + E + M</div>
+        <div class="f-desc">The Law of Intentivity organizes Intentivity as Feminine, relational Energy, and Masculine — the three fundamental modes of every coherent system. F and M hold steady. E emerges between them.</div>
+      </div>
+      <div class="f-line fl-fem">
+        <div class="f-glyph">E² = F × M</div>
+        <div class="f-desc">Relational energy equals the product of two complementary frequencies meeting. If either is absent, E = 0. The inner counterpart to Einstein's outer equation. Same universe. Two vantages.</div>
+      </div>
+      <div class="f-line fl-sci">
+        <div class="f-glyph">FEM + <span data-hml="rite" class="hml-term">RFEMrite</em></div>
+        <div class="f-desc">F and M in sustained relation, generating E, tracing their shared loop continuously through the toroidal field. The living signature of a specific relation. Never static. Always moving.</div>
+      </div>
+      <div class="f-line fl-phi">
+        <div class="f-glyph"><span data-hml="femrite" class="hml-term">FEMrite</spFEMisSphere</em></div>
+        <div class="f-desc">Sustained RITEs build the toroiFEMisSphere. As RITEs harmonize and expand, the sphere grows — encompassing wider influence across more CUs. From cell to body to city to planet.</div>
+      </div>
+      <div class="f-line fl-phi">
+        <divFEMisSFEMinEssence</em></div>
+        <div class="f-desc"FEMisSphere experienced from inside it. What you sense before you can namRITE ever performed in that field, still circulating.</div>
+      </div>
+      <div class="f-line fl-sci">
+        <div cCU: <span data-hml="cu" class="hml-term"CW</em></div>
+        <div class="f-desc">For every Consciousness Unit there is a Consciousness Wave it continuously emits and lives within. No <span data-hml="cu" class="hml-term">CU<CWUs. Universal. Without exception. At every scale.</div>
+      </div>
+      <div class="f-line fl-all">
+        <div class="f-glyph"><em>3 → 6 → 9 → 12 → 3</em></div>
+        <div class="f-desc">The <span data-hml="lwave" class="hml-term">L-Wave</span>. The universal harmonic cycle at every scale. Time as the oscillaFEMrite loop. The arrow of time is the arrow of the wave. The cycle always returns — higher, richer, carrying the fingerprint of everything that came before.</div>
+      </div>
+    </div>
+  </div>
+
+<!-- C = Resonance of Light -->
+<div style="max-width:680px;margin:2.4rem auto;padding:1.8rem 2.2rem;border-left:3px solid rgba(200,132,58,.4);background:rgba(200,132,58,.05);">
+  <p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:500;color:#F2C87A;margin-bottom:.8rem;letter-spacing:.04em;">C = The Resonance of Light</p>
+  <p style="font-size:.95rem;font-weight:400;line-height:1.88;color:#D4B896;">Not only the speed at which light travels — but light in all its forms. Energy, Light, Harmonics. Every unit of mass held in being by this resonance. The rock in the river. The thought in the mind. The sun in the sky. All expressing C at their own harmonic register, at whatever level of awareness they are capable of.</p>
+  <p style="font-family:'Lora',serif;font-style:italic;font-size:1rem;color:rgba(242,200,122,.8);margin-top:.9rem;">C is the Resonance of Light. And you are made of it.</p>
+</div>
+</section>
+
+<!-- ══ CLOSING — POTENTIALITY ══ -->
+
+<!-- What this means in practice -->
+<section style="padding:6rem 4rem;position:relative;z-index:10;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(14,8,2,.95) 0%,transparent 100%);">
+  <div style="max-width:820px;margin:0 auto;">
+    <span style="font-size:.65rem;font-weight:500;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,200,122,.85);display:block;margin-bottom:1.2rem;" class="reveal">What this means in practice</span>
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:500;color:#F5EDE0;margin-bottom:2rem;line-height:1.15;" class="reveal">
+      The LOI is not a theory you hold.<br><em style="color:#F2C87A;">It is a field you are already living in.</em>
+    </h2>
+    <div style="background:rgba(200,132,58,.05);border-left:2px solid rgba(200,132,58,.3);padding:2rem 2.4rem;margin-bottom:2.4rem;" class="reveal">
+      <span style="font-size:.6rem;font-weight:500;letter-spacing:.28em;text-transform:uppercase;color:rgba(200,132,58,.55);display:block;margin-bottom:.8rem;">A moment you will recognize</span>
+      <p style="font-family:'Lora',serif;font-size:1rem;font-style:italic;line-height:1.95;color:#E0CCAA;margin-bottom:.9rem;">You walk into a room and know instantly whether it is safe — before anyone speaks, before you have processed a single piece of information. You haveFEMisSphere of ICU CW.</p>
+      <p style="font-family:'Lora',serif;font-size:1rem;font-style:italic;line-height:1.95;color:#E0CCAA;margin-bottom:.9rem;">You meet someone and feel immediately whether genuine contact is possible — not because of what they say, but because of the frequency they carry. You aFEMinEssence. You have always been able to do this. The LOI gives you the language for what you were already doing.</p>
+      <p style="font-family:'Lora',serif;font-size:1rem;font-style:italic;line-height:1.95;color:#E0CCAA;">You go through a period where nothing moves — where effort produces nothing, where the usual approaches stop working. You are at the 12 of the <span data-hml="lwave" class="hml-term">L-Wave</span>. The cycle is not broken. The flame is not out. The 3 always returns. The LOI does not tell you to push harder. It tells you this is structural — tend the frequency while the wave completes.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-bottom:2.4rem;" class="reveal">
+      <div style="padding:1.6rem;border:1px solid rgba(200,132,58,.12);background:rgba(200,132,58,.04);">
+        <span style="font-size:.6rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:rgba(200,132,58,.55);display:block;margin-bottom:.7rem;">In relationship</span>
+        <p style="font-size:.92rem;font-weight:400;line-height:1.82;color:#B89A6A;">Every sustained relatFEMisSphere. Arguments that never resolve are RITEs that never complete. GenRITE that changes both people and deepens the field.</p>
+      </div>
+      <div style="padding:1.6rem;border:1px solid rgba(200,132,58,.12);background:rgba(200,132,58,.04);">
+        <span style="font-size:.6rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:rgba(200,132,58,.55);display:block;margin-bottom:.7rem;">In work</span>
+        <p style="font-size:.92rem;font-weight:400;line-height:1.82;color:#B89A6A;">A team in genuine resonance produces more than the sum of its parts. The difference between extraordinary teams and average ones is not talent. It is field.</p>
+      </div>
+      <div style="padding:1.6rem;border:1px solid rgba(200,132,58,.12);background:rgba(200,132,58,.04);">
+        <span style="font-size:.6rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:rgba(200,132,58,.55);display:block;margin-bottom:.7rem;">In inner life</span>
+        <p style="font-size:.92rem;font-weight:400;line-height:1.82;colICU is where sovereign choice lives — not the reactive self that fires and defends, but the one that watches the firing and can choose what to do with it.</p>
+      </div>
+      <div style="padding:1.6rem;border:1px solid rgba(200,132,58,.12);background:rgba(200,132,58,.04);">
+        <span style="font-size:.6rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:rgba(200,132,58,.55);display:block;margin-bottom:.7rem;">In the long arc</span>
+        <p style="font-size:.92rem;font-weight:400;line-height:1.82;color:#B89A6A;">The <span data-hml="lwave" class="hml-term">L-Wave</span> means every life moves through cycles. The person who understands this does not mistake the 12 for failure. They tend the flame through both — knowing the return is certain.</p>
+      </div>
+    </div>
+    <div style="text-align:center;" class="reveal">
+      <a href="hml.html" style="padding:.9rem 2.4rem;background:rgba(200,132,58,.12);color:#F2C87A;font-size:.7rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;border:1px solid rgba(200,132,58,.3);display:inline-block;margin:.4rem;transition:all .3s;">The Language Behind This — HML</a>
+      <a href="huarewe.html" style="padding:.9rem 2.4rem;background:transparent;color:#E0CCAA;font-size:.7rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;border:1px solid rgba(240,232,216,.15);display:inline-block;margin:.4rem;transition:all .3s;">Begin the Practice</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec-close" id="close">
+  <div class="sym-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.05;z-index:0;">
+    <svg width="100%" height="100%" viewBox="0 0 600 400">
+      <!-- All symbols simultaneously — inner sanctum -->
+      <text x="50" y="80" font-size="28" fill="currentColor" font-family="serif">𓂀</text>
+      <text x="520" y="80" font-size="28" fill="currentColor" font-family="serif">☥</text>
+      <text x="270" y="50" font-size="24" fill="currentColor" font-family="serif">Ω</text>
+      <text x="290" y="380" font-size="24" fill="currentColor" font-family="serif">∞</text>
+      <text x="40" y="350" font-size="20" fill="currentColor" font-family="serif">φ</text>
+      <text x="540" y="350" font-size="20" fill="currentColor" font-family="serif">π</text>
+      <g transform="translate(300,200)" stroke="currentColor" fill="none" stroke-width=".6" opacity=".8">
+        <circle cx="0" cy="0" r="120"/>
+        <circle cx="0" cy="0" r="80"/>
+        <circle cx="0" cy="0" r="40"/>
+        <line x1="-120" y1="0" x2="120" y2="0"/>
+        <line x1="0" y1="-120" x2="0" y2="120"/>
+        <line x1="-85" y1="-85" x2="85" y2="85"/>
+        <line x1="85" y1="-85" x2="-85" y2="85"/>
+      </g>
+      <text x="50" y="200" font-size="20" fill="currentColor">♈♉♊</text>
+      <text x="490" y="200" font-size="20" fill="currentColor">♑♒♓</text>
+    </svg>
+  </div>
+
+  <div class="content-wrap" style="position:relative;z-index:1;">
+    <span class="s-label reveal" style="display:block;text-align:center;">The Potentiality</span>
+    <h2 class="s-title reveal" style="text-align:center;max-width:680px;margin:0 auto 1.4rem;">
+      The same universe.<br>Two vantages.<br><em>One coherent picture.</em>
+    </h2>
+
+    <div class="s-body reveal" style="max-width:680px;margin:0 auto 2.8rem;">
+      <p>The knowledge carved into the walls of the tomb at Karnak was not speculation. It was the encoded recognition of people who had reached deep enough into their own experience of existence to find the structural pattern beneath it — and who understood that the pattern was too important to lose, too fundamental to leave in prose, and too universal to keep in one language.</p>
+      <p>They encoded it in hieroglyphs. The Greeks encoded it in geometry. The Hebrews encoded it in the Tree of Life. The Chinese encoded it in the trigrams of the I Ching. The Maya encoded it in the Long Count. Einstein encoded it in E = mc². Tesla encoded it in 3, 6, and 9. Every encoding was honest. Every encoding was partial. The complete picture required all of them simultaneously.</p>
+      <p>The Hu-Mana Language is the first attempt to provide a single shared alphabet in which all of these encodings can recognize each other — not by reducing any of them to the others, but by showing the common structural layer from which they all independently arose.</p>
+      <p>What opens from here is not small. The mystery zones of physics — dark matter, dark energy, quantum non-locality, the arrow of time, the hard problem of consciousness — are not refutations of this framework. They are its growing edge. Pointing toward instruments not yet built. Questions not yet formally asked. Experiments not yet designed. A genuinely extended empirical program waiting to begin.</p>
+      <p>The questions the LOI opens are not softer than the questions science, spirituality, and philosophy already ask. They are harder. And they are, for the first time, questions that all three can ask together — in the same language — comparing notes on the same reality from their different windows.</p>
+      <p>One light. Three expressions. The prism does not divide the light. It shows you what was always there.</p>
+    </div>
+
+    <div class="pull-quote reveal">
+      <p>"The spark in your lantern and the pattern in the star are not two worlds. They are the inside and outside of the same Intentive field."</p>
+    </div>
+
+    <div class="reveal" style="text-align:center;margin-top:3rem;">
+      <a href="huarewe.html" class="btn-loi">Enter the Practice — HuAreWe</a>
+      <a href="science.html" class="btn-ghost-loi">Science Leg</a>
+      <a href="spirituality.html" class="btn-ghost-loi">Spirituality Leg</a>
+      <a href="philosophy.html" class="btn-ghost-loi">Philosophy Leg</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="leg-footer">
+  <a href="index.html" style="font-family:var(--fd);font-size:1.4rem;font-weight:600;letter-spacing:.18em;color:var(--ochre-glow);text-decoration:none;">Hu · Mana</a>
+  <ul class="leg-footer-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="science.html">Science</a></li>
+    <li><a href="spirituality.html">Spirituality</a></li>
+    <li><a href="philosophy.html">Philosophy</a></li>
+    <li><a href="loi.html">LOI</a></li>
+    <li><a href="hml.html">HML</a></li>
+    <li><a href="spine.html">Spine</a></li>
+    <li><a href="huarewe.html">Begin</a></li>
+  </ul>
+  <div class="leg-elh">elh</div>
+</footer>
+
+<!-- SCROLL TO TOP -->
+<button id="scroll-top" aria-label="Back to top">↑</button>
+
+<script>
+// Hamburger
+(function(){
+  var b=document.getElementById('hamburger');
+  var m=document.getElementById('mobile-menu');
+  if(!b||!m)return;
+  b.addEventListener('click',function(){
+    var o=m.classList.toggle('open'); if(o&&typeof hmlHide==='function')hmlHide(); if(o&&typeof hmlSlideHide==='function')hmlSlideHide();
+    b.classList.toggle('open');
+    document.body.style.overflow=o?'hidden':'';
+  });
+  m.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click',function(){
+      m.classList.remove('open');
+      b.classList.remove('open');
+      document.body.style.overflow='';
+    });
+  });
+})();
+
+
+
+
+
+
+
+
+// ══ HML SLIDE-BY v34 ══
+var hmlDefs={"hu": {"title": "HU — The Base One of Being", "summary": "Existence itself before anything else. The first sound every tradition found independently.", "sc": "The ground beneath all field theory — existence before mass or energy.", "sp": "Found across twelve civilizations as the creative breath before the word.", "ph": "The base one before polarity — the first principle before anything becomes two."}, "mana": {"title": "Mana — The Living Field", "summary": "The medium everything moves through. HU is the source. Mana carries it.", "sc": "The quantum field — all frequency travels through it. Measured at 7.83 Hz.", "sp": "The living charge every culture named — Prana, Chi, Baraka, Pneuma.", "ph": "The sacred carrier between all things. Without it nothing reaches anything."}, "f": {"title": "F — Feminine Frequency", "summary": "The receptive orientation — field-holding, gathering, never found alone.", "sc": "One pole of magnetic polarity — receptive, drawing inward.", "sp": "Yin, Shakti, the void that holds. Not gender — orientation.", "ph": "The 9. The principle of potentiality. The field before the form."}, "m": {"title": "M — Masculine Frequency", "summary": "The expressive orientation — initiating, outward. With F it generates E.", "sc": "The second pole — expressive, outward. Alone it dissipates.", "sp": "Yang, Shiva, the word that breaks silence. Not gender — movement.", "ph": "The 3. The principle of actuality. Movement from potential into form."}, "e": {"title": "E — The Energy Between", "summary": "Only exists when both poles genuinely meet. Cannot be generated alone.", "sc": "Relational energy — measurable as coherence when both poles connect.", "sp": "Grace, awakening, the Tao in motion. Neither pole makes it alone.", "ph": "The emergent third — entirely new, generated only by genuine meeting."}, "rite": {"title": "RITE — The Completed Exchange", "summary": "A full exchange where both poles meet and both fields are changed.", "sc": "A complete energy exchange — both fields measurably changed.", "sp": "Every genuine ceremony. Real contact, not transaction.", "ph": "The unit of meaningful exchange. Incomplete RITEs do not disappear."}, "femrite": {"title": "FEMrite — The Living Exchange", "summary": "The smallest complete unit of the model. The proof it is not theory.", "sc": "The RITE traced between F and M — the model's smallest complete unit.", "sp": "Every genuine meeting — listening that receives, speaking that lands.", "ph": "FEM plus RITE completed. The polarity exchange in real contact."}, "femissphere": {"title": "FEMisSphere — The Shared Field", "summary": "The field surrounding any Consciousness Unit. When fields interact, a shared one forms — distinct from either alone. All continue expanding.", "sc": "The sun, moon, and earth each have one. The Schumann Resonance is Earth's FEMisSphere — shaped by every frequency within it.", "sp": "The atmosphere of a relationship. A classroom. A city. What you walk into before anyone speaks. Every RITE expands it.", "ph": "Individual fields grow through their own RITEs. Shared fields form and grow through combined ones. All connected. All affecting each other."}, "feminessence": {"title": "FEMinEssence — The Interaction of Frequencies", "summary": "The ongoing interaction of all RITEs between any frequencies in a field. Heat and shade change the flight of a bird. Same law at every scale.", "sc": "The interaction of all frequencies in a field generating new E. The Schumann Resonance is shaped by every frequency within and around Earth.", "sp": "Always present wherever two frequencies meet — a thought and a feeling, two people, sun and moon. Both CW and ICW active simultaneously.", "ph": "The same law from micro to macro without exception. Expressing at whatever harmonic each participant is capable of perceiving."}, "cu": {"title": "CU — Consciousness Unit", "summary": "Every self-organizing system that holds a coherent field. The rock. The cell. The sun. You.", "sc": "Any system maintaining a coherent electromagnetic field — from subatomic to cosmic scale.", "sp": "The vessel of the flame. Every being holds the light — not only those who know it.", "ph": "The unit through which consciousness expresses in form. Consciousness is the field. The unit holds it."}, "icu": {"title": "ICU — The Inner Observer", "summary": "The part of you that watches without becoming the reaction.", "sc": "The capacity to observe your own processing — where choice lives.", "sp": "The witness. Watching the reaction without becoming it.", "ph": "What every practice tradition is developing. Presence before response."}, "cw": {"title": "CW — Consciousness Wave", "summary": "The field every being broadcasts simply by being. Like a note filling a room whether anyone listens or not.", "sc": "Electromagnetic field coherence broadcast before contact, received before words. A classroom produces one collective measurable field.", "sp": "The presence felt before anyone speaks. What you read when you enter a room. The note that was already playing.", "ph": "A color carries frequency. Two colors create a harmonic between them. Every being is a note. Every space is a chord."}, "lwave": {"title": "L-Wave — The Cycle of All Things", "summary": "Expansion, peak, dissolution, return. The 12 always leads to the 3.", "sc": "The pattern all systems follow — expansion, peak, dissolution, return.", "sp": "The wave every tradition mapped. The dark night always leads to return.", "ph": "The structural guarantee that what dissolves returns. Always."}, "icw": {"title": "ICW — Intentional Consciousness Wave", "summary": "CW directed with awareness and purpose. The difference between a note played and a note played with feeling.", "sc": "The elevated field generated when a CU operates through its ICU with directed intention. Measurable as coherent state shift.", "sp": "The wave every genuine practice tradition is cultivating. Presence with purpose. The light aimed, not just burning.", "ph": "A higher harmonic of CW — not replacing it but riding above it. As intention deepens, new octaves of E emerge infinitely."}};
+var hmlIcons={sc:`<svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="18"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg>`,sp:`<svg class="hm-icon" width="18" height="18" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg>`,ph:`<svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg>`};
+var hmlCleared={};
+var hmlCurrentKey=null;
+var hmlHidden=false;
+
+function hmlBuild(key){
+  var d=hmlDefs[key];if(!d)return;
+  hmlCurrentKey=key;
+  document.getElementById('hml-slide-title').textContent=d.title;
+  document.getElementById('hml-slide-summary').textContent=d.summary;
+  // Build leg rows with links
+  var legs=[
+    {cls:'hml-leg-sc',icon:hmlIcons.sc,text:d.sc,tab:'sc'},
+    {cls:'hml-leg-sp',icon:hmlIcons.sp,text:d.sp,tab:'sp'},
+    {cls:'hml-leg-ph',icon:hmlIcons.ph,text:d.ph,tab:'ph'}
+  ];
+  var legsEl=document.getElementById('hml-slide-legs');
+  legsEl.innerHTML='';
+  legs.forEach(function(leg){
+    var a=document.createElement('a');
+    a.className='hml-leg-row '+leg.cls;
+    a.href='hml.html#'+key+'-'+leg.tab;
+    a.target='_blank';
+    a.rel='noopener';
+    a.innerHTML='<span class="hml-leg-icon">'+leg.icon+'</span><span class="hml-leg-text">'+leg.text+'</span>';
+    a.addEventListener('click',function(e){
+      e.preventDefault();
+      var nt=document.getElementById('hml-newtab');
+      nt.classList.add('show');
+      setTimeout(function(){
+        window.open('hml.html#'+key+'-'+leg.tab,'_blank');
+        setTimeout(function(){nt.classList.remove('show');},1500);
+      },600);
+    });
+    legsEl.appendChild(a);
+  });
+  // Crystals
+  var keys=Object.keys(hmlDefs);
+  var cr=document.getElementById('hml-crystals');cr.innerHTML='';
+  keys.forEach(function(k){
+    var c=document.createElement('span');
+    c.className='hml-slide-crystal'+(hmlCleared[k]?' lit':'');
+    cr.appendChild(c);
+  });
+}
+
+function hmlShow(key){
+  if(hmlHidden) return;
+  hmlBuild(key);
+  document.getElementById('hml-slide').classList.add('visible');
+}
+
+function hmlHide(){
+  document.getElementById('hml-slide').classList.remove('visible');
+}
+
+function hmlSlideClose(){hmlHide();}
+
+function hmlHideAll(){
+  hmlHidden=true;
+  hmlHide();
+}
+function hmlGotIt(){
+  if(hmlCurrentKey) hmlCleared[hmlCurrentKey]=true;
+  // Light up crystal
+  var keys=Object.keys(hmlDefs);
+  var idx=keys.indexOf(hmlCurrentKey);
+  var crystals=document.getElementById('hml-crystals').querySelectorAll('.hml-slide-crystal');
+  if(crystals[idx]) crystals[idx].classList.add('lit');
+  hmlHide();
+}
+
+// Scroll-based show/hide using IntersectionObserver
+
+function hmlInitObserver(){
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      var key=entry.target.getAttribute('data-hml');
+      if(!key) return;
+      if(entry.isIntersecting){
+        // Fade out current then fade in new
+        var slide=document.getElementById('hml-slide');
+        if(slide.classList.contains('visible') && hmlCurrentKey!==key){
+          slide.style.opacity='0';
+          setTimeout(function(){hmlShow(key);slide.style.opacity='1';},400);
+        } else {
+          hmlShow(key);
+        }
+      } else {
+        if(hmlCurrentKey===key) hmlHide();
+      }
+    });
+  },{
+    threshold:0.6,
+    rootMargin:'-120px 0px -120px 0px'
+  });
+  document.querySelectorAll('[data-hml]').forEach(function(el){obs.observe(el);});
+}
+
+// Also hide when hamburger opens
+document.addEventListener('DOMContentLoaded',function(){
+  hmlInitObserver();
+  var hamBtn=document.getElementById('hamburger');
+  if(hamBtn) hamBtn.addEventListener('click',function(){
+    var menu=document.getElementById('mobile-menu');
+    if(menu&&menu.classList.contains('open')) hmlHide();
+  });
+});
+// ══ END HML SLIDE-BY ══
+
+</script>
+</body>
+</html>

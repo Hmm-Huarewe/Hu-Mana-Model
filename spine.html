@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Spine — Inside the Hu · Mana Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+/* == MOBILE NAV == */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:.4rem;background:none;border:none;z-index:501;}
+.hamburger span{display:block;width:24px;height:2px;background:#F2C87A;border-radius:2px;transition:all .3s;}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mobile-menu{position:fixed;inset:0;z-index:500;background:rgba(24,13,42,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.mobile-menu.open{opacity:1;pointer-events:all;}
+.mobile-menu a{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:500;letter-spacing:.1em;color:#D8CCBA;text-decoration:none;transition:color .25s;}
+.mobile-menu a:hover{color:#F2C87A;}
+.mobile-menu .m-cta{margin-top:.5rem;padding:.65rem 2rem;border:1px solid #8A9898;color:#A8B8B8;background:rgba(138,152,152,.1);font-family:'Jost',sans-serif;font-size:.65rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;}
+@media(max-width:900px){.hamburger{display:flex;}.nav-links{display:none !important;}.nav-cta{display:none !important;}}
+/* == END MOBILE NAV == */
+
+:root{
+  --plum:#180D2A; --stone:#1A1208;
+  --amber:#C8843A; --amber-lt:#E4A85A; --amber-glow:#F2C87A;
+  --sci:#1A5A8B; --sci-lt:#5AB4D8;
+  --spi:#C85A00; --spi-lt:#E07820; --spi-glow:#F2A850;
+  --phi:#2A6B3C; --phi-lt:#4A9B5E; --phi-glow:#7AC89A;
+  --t1:#F5EDE0; --t2:#E0CCAA; --t3:#B89A6A;
+  --fd:'Cormorant Garamond',serif;
+  --ff:'Lora',serif;
+  --fb:'Jost',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fb);font-weight:400;background:var(--plum);
+  color:var(--t2);overflow-x:hidden;line-height:1.9;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--plum);}
+::-webkit-scrollbar-thumb{background:var(--amber);border-radius:2px;}
+
+/* BG MIST */
+#bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 100% 80% at 0% 100%,rgba(200,132,58,.18) 0%,transparent 55%),
+  radial-gradient(ellipse 70% 50% at 100% 0%,rgba(26,90,139,.1) 0%,transparent 50%);
+  transition:background 3s ease;}
+#beam-canvas{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0;transition:opacity 2s ease;}
+#beam-canvas.alive{opacity:1;}
+#beam-canvas svg{width:100%;height:100%;}
+
+/* CORNER LANTERN */
+#corner-lantern{position:fixed;bottom:24px;left:20px;z-index:200;width:88px;
+  pointer-events:none;filter:drop-shadow(0 0 18px rgba(200,132,58,.55));}
+
+/* MOBILE MENU */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;
+  padding:.4rem;z-index:500;background:none;border:none;}
+.hamburger span{display:block;width:24px;height:2px;background:#F2C87A;
+  border-radius:2px;transition:all .3s;}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mobile-menu{position:fixed;inset:0;background:rgba(24,13,42,.97);z-index:450;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1.4rem;opacity:0;pointer-events:none;transition:opacity .35s ease;}
+.mobile-menu.open{opacity:1;pointer-events:all;}
+.mobile-menu a{font-family:var(--fd);font-size:1.45rem;font-weight:500;
+  letter-spacing:.1em;color:#D8CCBA;text-decoration:none;transition:color .3s;}
+.mobile-menu a:hover{color:#F2C87A;}
+.mobile-menu .m-cta{margin-top:.6rem;padding:.7rem 2rem;
+  border:1px solid #8A9898;color:#A8B8B8;background:rgba(138,152,152,.1);
+  font-family:var(--fb);font-size:.65rem;font-weight:500;letter-spacing:.2em;
+  text-transform:uppercase;text-decoration:none;transition:all .3s;}
+.mobile-menu .m-cta:hover{background:rgba(138,152,152,.22);color:#C8D8D8;}
+@media(max-width:900px){
+  .hamburger{display:flex !important;}
+  .nav-links{display:none !important;}
+  .nav-cta{display:none !important;}
+}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:400;padding:1.3rem 3.5rem;
+  display:flex;justify-content:space-between;align-items:center;
+  transition:background .5s,border .5s;}
+nav.scrolled{background:rgba(24,13,42,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(200,132,58,.18);}
+.nav-logo{font-family:var(--fd);font-size:1.7rem;font-weight:600;
+  letter-spacing:.18em;color:var(--amber-glow);text-decoration:none;}
+.nav-links{display:flex;gap:1.6rem;list-style:none;}
+.nav-links a{font-size:.66rem;font-weight:500;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--t3);text-decoration:none;transition:color .3s;}
+.nav-links a:hover,.nav-links a.active{color:var(--amber-glow);}
+.nav-cta{padding:.6rem 1.4rem;border:1px solid var(--amber);color:var(--amber-glow);
+  font-size:.64rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;transition:all .3s;}
+.nav-cta:hover{background:var(--amber);color:var(--plum);}
+
+/* ANIMS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+@keyframes flicker{0%,100%{transform:scaleX(1) scaleY(1);}
+  25%{transform:scaleX(.92) scaleY(1.06);}50%{transform:scaleX(1.05) scaleY(.96);}
+  75%{transform:scaleX(.95) scaleY(1.04);}}
+@keyframes breathe{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.08);}}
+@keyframes pulseGlow{0%,100%{opacity:.25;}50%{opacity:.8;}}
+@keyframes beamPulse{0%,100%{opacity:.35;}50%{opacity:.58;}}
+@keyframes pathDraw{from{stroke-dashoffset:2000;}to{stroke-dashoffset:0;}}
+@keyframes nodeAppear{from{opacity:0;transform:scale(0);}to{opacity:1;transform:scale(1);}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .85s ease,transform .85s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* HERO */
+.hero{min-height:80vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;position:relative;overflow:hidden;padding:8rem 2rem 4rem;
+  background:radial-gradient(ellipse 80% 65% at 50% 35%,#2A1A06 0%,#1A0E04 45%,var(--plum) 100%);}
+.hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 35% 40% at 15% 80%,rgba(200,132,58,.2) 0%,transparent 55%),
+  radial-gradient(ellipse 25% 35% at 85% 20%,rgba(26,90,139,.1) 0%,transparent 55%);}
+.lantern-wrap{position:relative;margin-bottom:2.4rem;animation:float 6s ease-in-out infinite;}
+.lantern-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:240px;height:280px;
+  background:radial-gradient(ellipse,rgba(200,132,58,.2) 0%,transparent 68%);
+  animation:breathe 4s ease-in-out infinite;pointer-events:none;}
+.hero-eyebrow{font-size:.68rem;font-weight:500;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:1.2rem;
+  opacity:0;animation:fadeUp 1s .3s forwards;position:relative;z-index:1;}
+.hero-title{font-family:var(--fd);font-size:clamp(2.8rem,7vw,5rem);font-weight:500;
+  line-height:1.08;color:var(--t1);text-align:center;margin-bottom:.8rem;
+  opacity:0;animation:fadeUp 1s .55s forwards;position:relative;z-index:1;}
+.hero-title em{font-style:italic;color:var(--amber-glow);}
+.hero-sub{font-family:var(--ff);font-size:1.05rem;font-style:italic;
+  line-height:1.88;color:var(--t2);max-width:560px;text-align:center;
+  margin:0 auto 2.4rem;
+  opacity:0;animation:fadeUp 1s .8s forwards;position:relative;z-index:1;}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  opacity:0;animation:fadeUp 1s 1.5s forwards;}
+.scroll-hint span{font-size:.6rem;font-weight:500;letter-spacing:.3em;
+  text-transform:uppercase;color:rgba(200,132,58,.4);}
+.scroll-line{width:1px;height:32px;
+  background:linear-gradient(to bottom,rgba(200,132,58,.5),transparent);
+  animation:pulseGlow 2.2s infinite;}
+
+/* THE SPINE VERTICAL PATH */
+.spine-path{
+  position:relative;
+  max-width:820px;
+  margin:0 auto;
+  padding:0 2rem;
+}
+/* Vertical line running through all nodes */
+.spine-path::before{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:0;bottom:0;
+  width:1px;
+  background:linear-gradient(to bottom,
+    rgba(200,132,58,.05) 0%,
+    rgba(200,132,58,.3) 15%,
+    rgba(200,132,58,.3) 85%,
+    rgba(200,132,58,.05) 100%);
+  transform:translateX(-50%);
+}
+
+/* SPINE NODE */
+.spine-node{
+  display:grid;
+  grid-template-columns:1fr 60px 1fr;
+  gap:0;
+  margin-bottom:0;
+  position:relative;
+  z-index:10;
+}
+/* Every other node flips */
+.spine-node.flip{direction:rtl;}
+.spine-node.flip .node-content{direction:ltr;}
+.spine-node.flip .node-center{direction:ltr;}
+
+.node-content{
+  padding:3rem 2.8rem 3rem 0;
+  text-align:right;
+}
+.spine-node.flip .node-content{
+  padding:3rem 0 3rem 2.8rem;
+  text-align:left;
+}
+
+.node-center{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;
+  padding:2rem 0;
+}
+.node-dot{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid;
+  position:relative;z-index:1;
+  font-family:var(--fd);font-size:1.1rem;font-weight:500;font-style:italic;
+  flex-shrink:0;
+  background:var(--plum);
+  transition:all .4s;
+}
+.node-dot:hover{transform:scale(1.15);}
+.nd-amber{border-color:var(--amber);color:var(--amber-glow);}
+.nd-sci{border-color:var(--sci-lt);color:var(--sci-lt);}
+.nd-spi{border-color:var(--spi-lt);color:var(--spi-glow);}
+.nd-phi{border-color:var(--phi-lt);color:var(--phi-glow);}
+.nd-crown{border-color:#B57BEE;color:#D4A0EE;}
+.nd-all{
+  border-color:var(--amber);color:var(--amber-glow);
+  background:radial-gradient(circle,rgba(200,132,58,.12) 0%,var(--plum) 70%);
+}
+
+.node-num{
+  font-size:.58rem;font-weight:500;letter-spacing:.25em;
+  text-transform:uppercase;color:rgba(200,132,58,.4);
+  margin-bottom:.8rem;display:block;
+}
+.node-title{
+  font-family:var(--fd);font-size:clamp(1.3rem,2.5vw,1.9rem);font-weight:500;
+  color:var(--t1);margin-bottom:.5rem;line-height:1.15;
+}
+.node-title em{font-style:italic;color:var(--amber-glow);}
+.node-body{
+  font-size:.95rem;font-weight:400;line-height:1.88;color:var(--t2);
+  margin-bottom:1.1rem;
+}
+.node-body p{margin-bottom:.9rem;}
+.node-body p:last-child{margin-bottom:0;}
+.node-body strong{color:var(--t1);font-weight:500;}
+
+/* NODE LINKS — the contextual word buttons */
+.node-links{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem;}
+.spine-node.flip .node-links{justify-content:flex-start;}
+.node-link{
+  display:inline-flex;align-items:center;gap:.35rem;
+  font-size:.62rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;padding:.32rem .8rem;
+  border:1px solid;transition:all .3s;
+}
+.nl-amber{border-color:rgba(200,132,58,.28);color:rgba(200,132,58,.85);}
+.nl-amber:hover{border-color:var(--amber);color:var(--amber-glow);background:rgba(200,132,58,.06);}
+.nl-sci{border-color:rgba(90,180,216,.28);color:rgba(90,180,216,.85);}
+.nl-sci:hover{border-color:var(--sci-lt);color:#A8DCEF;background:rgba(26,90,139,.06);}
+.nl-spi{border-color:rgba(224,120,32,.28);color:rgba(224,120,32,.85);}
+.nl-spi:hover{border-color:var(--spi-lt);color:var(--spi-glow);background:rgba(200,90,0,.06);}
+.nl-phi{border-color:rgba(74,155,94,.28);color:rgba(74,155,94,.85);}
+.nl-phi:hover{border-color:var(--phi-lt);color:var(--phi-glow);background:rgba(42,107,60,.06);}
+.nl-crown{border-color:rgba(181,123,238,.28);color:rgba(181,123,238,.85);}
+.nl-crown:hover{border-color:#B57BEE;color:#D4A0EE;background:rgba(123,45,139,.06);}
+.nl-loi{border-color:rgba(200,132,58,.22);color:var(--amber-glow);
+  background:rgba(200,132,58,.06);}
+.nl-loi:hover{border-color:var(--amber);background:rgba(200,132,58,.12);}
+.nl-hml{border-color:rgba(200,132,58,.22);color:var(--t3);}
+.nl-hml:hover{border-color:var(--amber-lt);color:var(--amber-glow);}
+
+/* CONNECTOR between nodes */
+.node-connector{
+  text-align:center;font-family:var(--fd);font-size:1.2rem;
+  color:rgba(200,132,58,.25);padding:.5rem 0;
+  position:relative;z-index:10;
+}
+
+/* SHARED SECTIONS */
+section{position:relative;z-index:10;}
+.content-wrap{max-width:820px;margin:0 auto;}
+.s-label{font-size:.65rem;font-weight:500;letter-spacing:.38em;text-transform:uppercase;
+  color:var(--amber-lt);margin-bottom:1.1rem;display:block;}
+.s-title{font-family:var(--fd);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:500;
+  line-height:1.15;color:var(--t1);margin-bottom:1.4rem;}
+.s-title em{font-style:italic;color:var(--amber-glow);}
+.s-body{font-size:1rem;font-weight:400;line-height:1.92;color:var(--t2);}
+.s-body p{margin-bottom:1.1rem;}
+.s-body strong{color:var(--t1);font-weight:500;}
+.pull-quote{margin:2.4rem 0;padding:1.2rem 0 1.2rem 1.8rem;border-left:2px solid var(--amber);}
+.pull-quote p{font-family:var(--ff);font-size:clamp(1.1rem,2vw,1.5rem);
+  font-style:italic;line-height:1.55;color:var(--amber-glow);}
+
+/* THREE LEGS COMPARISON */
+.three-compare{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin:2.4rem 0;}
+.tc-card{padding:1.6rem;border:1px solid;background:rgba(0,0,0,.2);transition:all .35s;}
+.tc-card:hover{transform:translateY(-3px);}
+.tc-sci{border-color:rgba(90,180,216,.18);}
+.tc-sci:hover{border-color:rgba(90,180,216,.38);}
+.tc-spi{border-color:rgba(224,120,32,.18);}
+.tc-spi:hover{border-color:rgba(224,120,32,.38);}
+.tc-phi{border-color:rgba(74,155,94,.18);}
+.tc-phi:hover{border-color:rgba(74,155,94,.38);}
+.tc-label{font-size:.6rem;font-weight:500;letter-spacing:.25em;text-transform:uppercase;
+  display:block;margin-bottom:.7rem;}
+.tc-body{font-size:.88rem;font-weight:400;line-height:1.8;color:var(--t2);}
+
+/* ENTER SECTION */
+.enter-section{padding:8rem 4rem;
+  background:radial-gradient(ellipse 80% 65% at 50% 50%,rgba(26,14,2,.9) 0%,transparent 100%);}
+.enter-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:3rem;}
+.enter-card{padding:2.4rem;border:1px solid rgba(200,132,58,.12);
+  background:rgba(200,132,58,.04);text-align:center;
+  text-decoration:none;display:block;transition:all .4s;position:relative;overflow:hidden;}
+.enter-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+.enter-card:hover{transform:translateY(-5px);}
+.enter-card:hover::before{transform:scaleX(1);}
+.ec-sci::before{background:var(--sci-lt);}
+.ec-spi::before{background:var(--spi-lt);}
+.ec-phi::before{background:var(--phi-lt);}
+.ec-loi::before{background:var(--amber);}
+.ec-hml::before{background:var(--amber-lt);}
+.ec-hub::before{background:#B57BEE;}
+.enter-card:hover{border-color:rgba(200,132,58,.28);}
+.ec-icon{font-size:2rem;margin-bottom:.9rem;display:block;}
+.ec-title{font-family:var(--fd);font-size:1.25rem;font-weight:500;
+  color:var(--t1);margin-bottom:.5rem;}
+.ec-desc{font-size:.85rem;font-weight:400;line-height:1.78;color:var(--t2);}
+
+/* CLOSING */
+.sec-close{padding:8rem 4rem 12rem;text-align:center;
+  background:radial-gradient(ellipse 80% 70% at 50% 50%,rgba(18,6,30,.9) 0%,transparent 100%);}
+.btn-enter{padding:1rem 2.8rem;background:var(--amber);color:var(--plum);
+  font-size:.72rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
+  text-decoration:none;display:inline-block;transition:all .3s;margin:.5rem;}
+.btn-enter:hover{background:var(--amber-lt);transform:translateY(-2px);}
+.btn-ghost{padding:1rem 2.8rem;background:transparent;color:var(--t1);
+  font-size:.72rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
+  text-decoration:none;display:inline-block;
+  border:1px solid rgba(240,232,216,.2);transition:all .3s;margin:.5rem;}
+.btn-ghost:hover{border-color:var(--amber-lt);color:var(--amber-glow);}
+
+/* SCROLL TO TOP */
+#scroll-top{position:fixed;bottom:90px;right:20px;z-index:300;
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(24,13,42,.88);border:1px solid rgba(200,132,58,.4);
+  color:var(--amber-glow);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .4s,transform .3s;
+  backdrop-filter:blur(8px);}
+#scroll-top.visible{opacity:1;pointer-events:all;}
+#scroll-top:hover{transform:translateY(-3px);}
+
+/* FOOTER */
+.leg-footer{padding:2.8rem 4rem;border-top:1px solid rgba(200,132,58,.15);
+  display:flex;justify-content:space-between;align-items:center;
+  position:relative;z-index:10;}
+.leg-footer-links{display:flex;gap:1.8rem;list-style:none;}
+.leg-footer-links a{font-size:.68rem;font-weight:500;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--t3);text-decoration:none;transition:color .3s;}
+.leg-footer-links a:hover{color:var(--amber-lt);}
+.leg-elh{font-family:var(--fd);font-size:.95rem;font-style:italic;color:rgba(200,132,58,.38);}
+
+@media(max-width:900px){
+  nav{padding:1.1rem 1.5rem;}
+  .spine-path::before{left:24px;}
+  .spine-node{grid-template-columns:24px 1fr;}
+  .spine-node.flip{direction:ltr;}
+  .node-center{grid-column:1;grid-row:1;}
+  .node-content{grid-column:2;grid-row:1;padding:1.8rem 0 1.8rem 1.4rem;text-align:left;}
+  .spine-node.flip .node-content{padding:1.8rem 0 1.8rem 1.4rem;text-align:left;}
+  .node-links{justify-content:flex-start !important;}
+  .three-compare,.enter-grid{grid-template-columns:1fr;}
+  .enter-section,.sec-close{padding:5rem 1.5rem;}
+  .leg-footer{flex-direction:column;gap:1.2rem;text-align:center;padding:2rem 1.2rem;}
+  .leg-footer-links{flex-wrap:wrap;justify-content:center;gap:.7rem;}
+  .leg-footer-links a{font-size:.6rem;}
+}
+
+/* Reveal fallback */
+.reveal{animation:revealFb 0s 2.5s forwards;}@keyframes revealFb{to{opacity:1;transform:translateY(0);}}
+
+/* ── BUTTON COLOR SCHEME — WARM AMBER ── */
+.btn-root, .btn-primary, .btn-enter {
+  background: linear-gradient(135deg, #C8843A 0%, #E4A85A 100%);
+  color: #180D2A;
+  border: none;
+  box-shadow: 0 4px 24px rgba(200,132,58,.35);
+  transition: all .3s ease;
+}
+.btn-root:hover, .btn-primary:hover, .btn-enter:hover {
+  background: linear-gradient(135deg, #E4A85A 0%, #F2C87A 100%);
+  box-shadow: 0 6px 32px rgba(200,132,58,.55);
+  transform: translateY(-2px);
+}
+.btn-ghost, .btn-loi {
+  background: transparent;
+  color: #F2C87A;
+  border: 1px solid rgba(200,132,58,.5);
+  transition: all .3s ease;
+}
+.btn-ghost:hover, .btn-loi:hover {
+  background: rgba(200,132,58,.12);
+  border-color: #C8843A;
+  color: #F2C87A;
+  transform: translateY(-2px);
+}
+.nav-cta {
+  background: rgba(200,132,58,.15);
+  border: 1px solid rgba(200,132,58,.55);
+  color: #F2C87A;
+  transition: all .3s ease;
+}
+.nav-cta:hover {
+  background: #C8843A;
+  color: #180D2A;
+}
+.mobile-menu .m-cta {
+  border: 1px solid rgba(200,132,58,.5) !important;
+  color: #F2C87A !important;
+  background: rgba(200,132,58,.12) !important;
+}
+.mobile-menu .m-cta:hover {
+  background: rgba(200,132,58,.25) !important;
+  color: #F2C87A !important;
+}
+/* ── END BUTTON COLORS ── */
+
+
+
+
+
+
+/* ══ HML SLIDE-BY v34 ══ */
+.hml-slide{
+  position:fixed;
+  bottom:4.5rem;
+  right:-340px;
+  width:min(300px,58vw);
+  z-index:390;
+  background:rgba(14,8,24,.97);
+  border:1px solid rgba(200,132,58,.2);
+  border-right:none;
+  padding:1.1rem 1.3rem 1rem;
+  transition:right .5s cubic-bezier(.22,1,.36,1);
+  pointer-events:none;
+}
+.hml-slide.visible{right:0;pointer-events:all;transition:right .5s cubic-bezier(.22,1,.36,1),opacity .4s ease;}
+.hml-slide-close{
+  position:absolute;top:.45rem;right:.55rem;
+  font-size:.55rem;font-weight:500;letter-spacing:.15em;
+  color:rgba(200,170,120,.3);cursor:pointer;
+  background:none;border:none;font-family:'Jost',sans-serif;
+  transition:color .25s;padding:0;
+}
+.hml-slide-close:hover{color:rgba(200,170,120,.65);}
+.hml-slide-crystals{display:flex;gap:3px;margin-bottom:.6rem;flex-wrap:wrap;}
+.hml-slide-crystal{width:6px;height:6px;border-radius:50%;background:rgba(200,132,58,.15);transition:all .5s;flex-shrink:0;}
+.hml-slide-crystal.lit{background:#F2C87A;box-shadow:0 0 6px rgba(242,200,122,.7);}
+.hml-slide-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:.9rem;font-weight:500;color:#F2C87A;
+  margin-bottom:.5rem;line-height:1.2;
+}
+.hml-slide-summary{
+  font-size:.75rem;font-weight:400;line-height:1.6;
+  color:#D4B896;margin-bottom:.7rem;
+  padding-bottom:.7rem;
+  border-bottom:1px solid rgba(200,132,58,.15);
+}
+.hml-slide-legs{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.8rem;}
+.hml-leg-row{display:flex;align-items:flex-start;gap:.5rem;text-decoration:none;transition:opacity .2s;}
+.hml-leg-row:hover{opacity:.8;}
+.hml-leg-row svg{flex-shrink:0;margin-top:1px;}
+.hml-leg-text{font-size:.72rem;font-weight:400;line-height:1.5;}
+.hml-leg-sc .hml-leg-text{color:rgba(90,180,216,.9);}
+.hml-leg-sp .hml-leg-text{color:rgba(224,140,42,.9);}
+.hml-leg-ph .hml-leg-text{color:rgba(74,165,94,.9);}
+.hml-slide-newtab{
+  font-size:.6rem;font-weight:500;letter-spacing:.12em;
+  color:rgba(242,200,122,.6);display:none;
+  margin-bottom:.6rem;font-style:italic;
+}
+.hml-slide-newtab.show{display:block;}
+.hml-slide-gotit{
+  width:100%;padding:.55rem;
+  background:rgba(200,132,58,.12);
+  border:1px solid rgba(200,132,58,.3);
+  color:#F2C87A;font-size:.62rem;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;
+  cursor:pointer;font-family:'Jost',sans-serif;
+  transition:all .25s;
+}
+.hml-slide-gotit:hover{background:rgba(200,132,58,.25);}
+@media(max-width:600px){
+  .hml-slide{width:min(270px,62vw);padding:.9rem 1rem .85rem;}
+  .hml-leg-text{font-size:.68rem;}
+  .hml-slide-title{font-size:.82rem;}
+}
+/* ══ END HML SLIDE-BY ══ */
+
+</style>
+</head>
+<body>
+<!-- ══ HML SLIDE-BY ══ -->
+<div class="hml-slide" id="hml-slide">
+  <button class="hml-slide-close" onclick="hmlSlideClose()">✕</button>
+  <div class="hml-slide-crystals" id="hml-crystals"></div>
+  <div class="hml-slide-title" id="hml-slide-title"></div>
+  <div class="hml-slide-summary" id="hml-slide-summary"></div>
+  <div class="hml-slide-legs" id="hml-slide-legs"></div>
+  <div class="hml-slide-newtab" id="hml-newtab">Opening HML in a new tab ↗</div>
+  <div style="display:flex;gap:.5rem;"><button class="hml-slide-gotit" onclick="hmlGotIt()" style="flex:1;">Got it</button><button class="hml-slide-gotit" onclick="hmlHideAll()" style="flex:1;background:rgba(80,50,80,.2);border-color:rgba(180,100,180,.2);color:rgba(200,170,200,.6);">Hide This</button></div>
+</div>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html">Home</a>
+  <a href="science.html">Science</a>
+  <a href="spirituality.html">Spirituality</a>
+  <a href="philosophy.html">Philosophy</a>
+  <a href="loi.html">Law of Intentivity</a>
+  <a href="hml.html">Hu-Mana Language</a>
+  <a href="spine.html">The Spine</a>
+  <a href="huarewe.html" class="m-cta">Begin the Practice</a>
+</div>
+
+<nav id="nav">
+  <a href="index.html" class="nav-logo">Hu · Mana</a>
+  <ul class="nav-links">
+    <li><a href="index.html#what">The Model</a></li>
+    <li><a href="science.html">Science</a></li>
+    <li><a href="spirituality.html">Spirituality</a></li>
+    <li><a href="philosophy.html">Philosophy</a></li>
+    <li><a href="loi.html">LOI</a></li>
+    <li><a href="hml.html">HML</a></li>
+    <li><a href="spine.html" class="active">Spine</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <a href="huarewe.html" class="nav-cta">Begin</a>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero" id="top">
+  <div class="lantern-wrap">
+    <div class="lantern-glow"></div>
+    <svg width="140" height="200" viewBox="0 0 140 200" fill="none">
+      <defs>
+        <radialGradient id="hf1" cx="50%" cy="78%" r="60%">
+          <stop offset="0%" stop-color="#F2C87A"/>
+          <stop offset="50%" stop-color="#E4903A"/>
+          <stop offset="100%" stop-color="#C85A20"/>
+        </radialGradient>
+        <radialGradient id="hf2" cx="50%" cy="68%" r="55%">
+          <stop offset="0%" stop-color="#FFFAD0"/>
+          <stop offset="60%" stop-color="#F2C87A"/>
+          <stop offset="100%" stop-color="#E4A850"/>
+        </radialGradient>
+      </defs>
+      <line x1="70" y1="2" x2="70" y2="16" stroke="#8B5E3C" stroke-width="1.5"/>
+      <path d="M40 18 Q70 12 100 18 L96 26 Q70 21 44 26Z" fill="#6B4226"/>
+      <path d="M44 26 L36 142 Q70 152 104 142 L96 26Z" fill="rgba(160,120,60,.07)" stroke="#C8843A" stroke-width=".8"/>
+      <line x1="70" y1="26" x2="70" y2="142" stroke="#8B5E3C" stroke-width="1" opacity=".5"/>
+      <path d="M40 64 Q70 70 100 64" stroke="#8B5E3C" stroke-width=".8" fill="none" opacity=".38"/>
+      <path d="M38 100 Q70 107 102 100" stroke="#8B5E3C" stroke-width=".8" fill="none" opacity=".38"/>
+      <ellipse cx="70" cy="90" rx="22" ry="28" fill="rgba(242,200,122,.1)"/>
+      <g style="animation:flicker 2.9s ease-in-out infinite;transform-origin:50% 78%">
+        <path d="M70 112 C62 104 59 92 63 81 C66 74 68 69 70 62 C72 69 74 74 77 81 C81 92 78 104 70 112Z" fill="url(#hf1)"/>
+        <path d="M70 107 C64 100 61 91 64 81 C66 76 68 72 70 68 C72 72 74 76 76 81 C79 91 76 100 70 107Z" fill="url(#hf2)"/>
+        <path d="M70 100 C67 95 65 88 67 82 C68 79 69 76 70 73 C71 76 72 79 73 82 C75 88 73 95 70 100Z" fill="rgba(255,252,220,.8)"/>
+      </g>
+      <path d="M36 142 Q70 152 104 142 L107 156 Q70 166 33 156Z" fill="#6B4226"/>
+      <ellipse cx="52" cy="160" rx="8" ry="3" fill="#2A1408"/>
+      <ellipse cx="88" cy="160" rx="8" ry="3" fill="#2A1408"/>
+    </svg>
+  </div>
+  <p class="hero-eyebrow">The Spine · HuManaModel v1</p>
+  <h1 class="hero-title">See and feel<br><em>inside the model.</em></h1>
+  <p class="hero-sub">This is the full unfolding — a single guided path that begins with why there is anything at all and ends with what you can do with this in your own life. Walk it in order. Or enter at any node that calls you.</p>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Begin the walk</span>
+  </div>
+</section>
+
+<!-- ══ OPENING CLAIM ══ -->
+<section style="padding:6rem 4rem 4rem;position:relative;z-index:10;
+  background:radial-gradient(ellipse 70% 55% at 50% 50%,rgba(26,14,2,.9) 0%,transparent 100%);">
+  <div class="content-wrap">
+    <span class="s-label reveal">The Opening Claim</span>
+    <h2 class="s-title reveal">Three angles.<br><em>One reality.</em></h2>
+    <div class="s-body reveal">
+      <p>The Hu-Mana Model proposes that all scientific, spiritual, and philosophical accounts of reality are different expressions of one coherent language about resonance and frequency — and that <strong>none of their existing formulas, doctrines, or arguments need to change for this to be true.</strong></p>
+      <p>This is not a new theory competing with what exists. It is a language that operates one level beneath all three disciplines — at the level of pattern, polarity, resonance, and cycle — and shows that science, spirituality, and philosophy each independently discovered the same structural primitives and named them in their own tongue.</p>
+      <p>The through-line is the <strong>Law of Intentivity</strong>. Every something carries an intrinsic tendency — a direction of relating and changing — which always expresses itself as specific frequencies and harmonic patterns. The LOI describes how those frequencies meet, resonate, generate new energy, and write patterns into the field of reality.</p>
+    </div>
+    <div class="pull-quote reveal">
+      <p>"If science, spirituality, and philosophy were not three different worlds but three different angles on the same reality you are already living — what would that change?"</p>
+    </div>
+    <div class="three-compare reveal">
+      <div class="tc-card tc-sci">
+        <span class="tc-label" style="color:var(--sci-lt);"><svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="1"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg> Science</span>
+        <p class="tc-body">Measures the light. Frequency, amplitude, field behavior. Gives us the mathematics of relation. Cannot — within its own methods — tell us what it means to be a being inside this field.</p>
+      </div>
+      <div class="tc-card tc-spi">
+        <span class="tc-label" style="color:var(--spi-glow);"><svg class="hm-icon" width="16" height="20" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg> Spirituality</span>
+        <p class="tc-body">Tends the light. Cultivates the inner frequency, cleans the glass of the lantern, aligns with the larger field. Cannot — alone — tell us the precise mechanism by which these practices work.</p>
+      </div>
+      <div class="tc-card tc-phi">
+        <span class="tc-label" style="color:var(--phi-glow);"><svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg> Philosophy</span>
+        <p class="tc-body">Asks what the light is for. Gives us the framework of meaning within which both measurement and practice make sense. Cannot — alone — tell us whether its frameworks correspond to actual field dynamics.</p>
+      </div>
+    </div>
+    <div class="s-body reveal" style="margin-top:1.4rem;">
+      <p>Each two legs prove the third. The Hu-Mana Language is what makes all three readable in the same room at the same time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- If you are completely new -->
+<section style="padding:4rem 4rem 2rem;position:relative;z-index:10;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(26,14,2,.9) 0%,transparent 100%);">
+  <div style="max-width:700px;margin:0 auto;text-align:center;">
+    <span style="font-size:.62rem;font-weight:500;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,200,122,.85);display:block;margin-bottom:1rem;">If you are completely new</span>
+    <p style="font-family:'Lora',serif;font-size:1.05rem;font-style:italic;line-height:1.95;color:rgba(224,204,170,.85);margin-bottom:1.4rem;">You do not need to understand the model before you walk the Spine. The Spine is how you come to understand it — by moving through it in order, one node at a time, letting each one land before the next one opens.</p>
+    <p style="font-size:.95rem;font-weight:400;line-height:1.88;color:#B89A6A;">Start at Node 01. Read slowly. Follow the links that call to you. Return when you are ready for the next node. There is no wrong pace. There is no prerequisite. The only requirement is honest attention.</p>
+  </div>
+</section>
+<!-- ══ THE SPINE PATH ══ -->
+<section style="padding:4rem 4rem 6rem;position:relative;z-index:10;">
+  <div class="content-wrap">
+    <span class="s-label reveal" style="text-align:center;display:block;">The Guided Path</span>
+    <h2 class="s-title reveal" style="text-align:center;margin-bottom:3.5rem;">Walk the model<br><em>from the inside.</em></h2>
+  </div>
+
+  <div class="spine-path">
+
+    <!-- NODE 1: HU + MANA -->
+    <div class="spine-node reveal">
+      <div class="node-content">
+        <span class="node-num">01</span>
+        <div class="node-title"><em><span data-hml="hu" class="hml-term">HU</span></em> and <em><span data-hml="mana" class="hml-term">Mana</span></em></div>
+        <div class="node-body">
+          <p>Before any field, any energy, any form — there is existence expressing through a medium. <span data-hml="hu" class="hml-term">HU</span> is the oldest sound humanity has ever used for the creative spark — found independently in twelve civilizations who never met. <span data-hml="mana" class="hml-term">Mana</span> is the living field that receives, carries, and returns that pattern changed.</p>
+          <p>The potter and the clay. The word and the field it writes into. Neither complete without the other. This is where the model begins — not with theory, but with the simplest possible statement about what is.</p>
+        </div>
+        <div class="node-links">
+          <a href="philosophy.html#hu" class="node-link nl-phi">Etymology in 12 languages →</a>
+          <a href="hml.html#hu" class="node-link nl-hml">HML Definition →</a>
+          <a href="loi.html#hu" class="node-link nl-loi">LOI →</a>
+        </div>
+      </div>
+      <div class="node-center">
+        <div class="node-dot nd-amber"><span data-hml="hu" class="hml-term">HU</span></div>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="node-connector">↓</div>
+
+    <!-- NODE 2: F · E · M -->
+    <div class="spine-node flip reveal">
+      <div class="node-content">
+        <span class="node-num">02</span>
+        <div class="node-title">F · E · <em>M</em></div>
+        <div class="node-body">
+          <p>Existence organizes itself into two complementary poles. F — receptive, field-holding, gathering inward. M — directive, initiating, emitting outward. These are not feminine and masculine in any social sense. They are the two fundamental modes by which any frequency holds itself in relation to another.</p>
+          <p>A magnetic monopole has never been found. Polarity is structural to existence. Where F and M meet and sustain their relation — E is born. The relational energy that only exists because both poles are present. E² = F × M.</p>
+        </div>
+        <div class="node-links">
+          <a href="science.html#fem" class="node-link nl-sci">The Physics →</a>
+          <a href="spirituality.html#flame" class="node-link nl-spi">The Flame and the Glass →</a>
+          <a href="philosophy.html#twelve" class="node-link nl-phi">Yin and Yang →</a>
+          <a href="hml.html#f" class="node-link nl-hml">F · M · E in HML →</a>
+        </div>
+      </div>
+      <div class="node-center">
+        <div class="node-dot nd-amber">FEM</div>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="node-connector">↓</div>
+
+    <!-- NODE 3: RITE -->
+    <div class="spine-node reveal">
+      <div class="node-content">
+        <span class="node-num">03</span>
+        <div class="node-title">The <em><span data-hml="rite" class="hml-term">RITE</span></em></div>
+        <div class="node-body">
+          <p>One complete loop of relational exchange between F and M — the unit by which Intentivity writes pattern into reality. <strong>R</strong>esonance · <strong>I</strong>ntention · <strong>T</strong>ransmuting · <strong>E</strong>nergy.</p>
+          <p>The river carves a valley through <span data-hml="rite" class="hml-term">RITE</span>. A friendship writes its atmosphere through <span data-hml="rite" class="hml-term">RITE</span>. A civilization builds its character through RITE. None of this is mystical — it is the ordinary process by which sustained interaction becomes form. Every genuine exchange you have ever had was a RITE. The effects are still in the field.</p>
+        </div>
+        <div class="node-links">
+          <a href="science.html#rite" class="node-link nl-sci">Entrainment in Science →</a>
+          <a href="spirituality.html#soot" class="node-link nl-spi">Why Ceremony Works →</a>
+          <a href="hml.html#rite" class="node-link nl-hml"><span data-hml="rite" class="hml-term">RITE</span> in HML →</a>
+          <a href="loi.html#rite" class="node-link nl-loi">Full LOI Treatment →</a>
+        </div>
+      </div>
+      <div class="node-center">
+        <div class="node-dot nd-amber"><span data-hml="rite" class="hml-term">RITE</span></div>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="node-connector">↓</div>
+
+    <!-- NODE 4: FEMisSphere -->
+    <div class="spine-node flip reveal">
+      <div class="node-content">
+        <span class="node-num">04</span>
+        <div class="node-title">The <em><span data-hml="femissphere" class="hml-term">FEMisSphere</span></em></div>
+        <div class="node-body">
+          <p>Sustained RITEs build a toroidal field around every coherent system. As RITEs harmonize and accumulate — the sphere grows. From the field around a single cell, to a body, to a family, to a city, to a planet. Every coherent grouping has one. You can feel its <span data-hml="feminessence" class="hml-term">FEMinEssence</span> — the tone it carries — before you can name it.</p>
+          <p>The heart's electromagnetic field is measurable several feet from the body. The Schumann Resonance is Earth's <span data-hml="femissphere" class="hml-term">FEMisSphere</span> field at 7.83 Hz. A sacred space accumulates its atmosphere through centuries of ceremony. The torus is the universe's preferred stable field shape — self-sustaining, self-referencing.</p>
+        </div>
+        <div class="node-links">
+          <a href="science.html#torus" class="node-link nl-sci">Toroidal Fields →</a>
+          <a href="spirituality.html#glass" class="node-link nl-spi">Sacred Space →</a>
+          <a href="philosophy.html#civilizations" class="node-link nl-phi">Culture as <span data-hml="femissphere" class="hml-term">FEMisSphere</span> →</a>
+          <a href="hml.html#femissphere" class="node-link nl-hml">HML Definition →</a>
+        </div>
+      </div>
+      <div class="node-center">
+        <div class="node-dot nd-amber" style="font-size:.75rem;">FEMis<br>Sphere</div>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="node-connector">↓</div>
+
+    <!-- NODE 5: CU and ICU -->
+    <div class="spine-node reveal">
+      <div class="node-content">
+        <span class="node-num">05</span>
+        <div class="node-title"><em><span data-hml="cu" class="hml-term">CU</span></em> and <em><span data-hml="icu" class="hml-term">ICU</span></em></div>
+        <div class="node-body">
+          <p>Every coherent unit of being is a Consciousness Unit — conscious by virtue of simply existing and participating in the field. The rock. The river. The crystal. The star. Consciousness here is not awareness — it is existence in relation.</p>
+          <p>Then the leap. When a <span data-hml="cu" class="hml-term">CU</span> becomes capable of recognizing itself and another — of saying <em>I see you</em> — the resonance changes completely. Two frequencies recognizing each other as sources. This is the <span data-hml="icu" class="hml-term">ICU</span> — the Individual Consciousness Unit. This is where the key appears in the hand. Where sovereign choice over the quality of what you radiate becomes available.</p>
+        </div>
+        <div class="node-links">
+          <a href="science.html#cu" class="node-link nl-sci">The Physics →</a>
+          <a href="spirituality.html#icu" class="node-link nl-spi">I See You →</a>
+          <a href="hml.html#cu" class="node-link nl-hml"><span data-hml="cu" class="hml-term">CU</span> · <span data-hml="icu" class="hml-term">ICU</span> · <span data-hml="cw" class="hml-term">CW</span> in HML →</a>
+          <a href="loi.html#cu" class="node-link nl-loi">LOI Architecture →</a>
+        </div>
+      </div>
+      <div class="node-center">
+        <div class="node-dot nd-amber"><span data-hml="icu" class="hml-term">ICU</span></div>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="node-connector">↓</div>
+
+    <!-- NODE 6: L-WAVE -->
+    <div class="spine-node flip reveal">
+      <div class="node-content">
+        <span class="node-num">06</span>
+        <div class="node-title">The <em><span data-hml="lwave" class="hml-term">L-Wave</span></em></div>
+        <div class="node-body">
+          <p>Every process in the universe follows the same arc. Tesla saw it in 3, 6, 9, and 12. The <span data-hml="lwave" class="hml-term">L-Wave</span> names it: <strong>3</strong> — the breath in, beginning · <strong>6</strong> — union, expression · <strong>9</strong> — the crest, peak · <strong>12</strong> — dissolution, the gap · <strong>3</strong> — the return. Higher. Richer. Carrying everything the cycle contained.</p>
+          <p>Time is not a geometric dimension. Time is the oscillation rate of the <span data-hml="femrite" class="hml-term">FEMrite</span> loop. The arrow of time is the arrow of the wave. The dark phase at 12 is not failure — it is the breath between cycles. The flame was never out. The 3 always returns.</p>
+        </div>
+        <div class="node-links">
+          <a href="science.html#lwave" class="node-link nl-sci">Tesla's Key →</a>
+          <a href="spirituality.html#lwave" class="node-link nl-spi">The Cycle in Your Life →</a>
+          <a href="philosophy.html#metatron" class="node-link nl-phi">Tree of Life as <span data-hml="lwave" class="hml-term">L-Wave</span> →</a>
+          <a href="hml.html#lwave" class="node-link nl-hml"><span data-hml="lwave" class="hml-term">L-Wave</span> in HML →</a>
+        </div>
+      </div>
+      <div class="node-center">
+        <div class="node-dot nd-amber" style="font-size:.75rem;"><span data-hml="lwave" class="hml-term">L-Wave</span></div>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="node-connector">↓</div>
+
+    <!-- NODE 7: THE THREE LEGS -->
+    <div class="spine-node reveal">
+      <div class="node-content">
+        <span class="node-num">07</span>
+        <div class="node-title">Three legs.<br><em>One light.</em></div>
+        <div class="node-body">
+          <p>Science, spirituality, and philosophy are not three different worlds. They are three angles on the same field — each one capturing something the others cannot fully express alone. Each one incomplete without the other two. Each two legs proving the third.</p>
+          <p>No leg is more real. No tradition is primary. Every lantern is sacred. The Hu-Mana Language is what lets them finally speak to each other — not by reducing any of them, but by naming the structural layer from which they all independently arose.</p>
+        </div>
+        <div class="node-links">
+          <a href="science.html" class="node-link nl-sci">Enter Science →</a>
+          <a href="spirituality.html" class="node-link nl-spi">Enter Spirituality →</a>
+          <a href="philosophy.html" class="node-link nl-phi">Enter Philosophy →</a>
+        </div>
+      </div>
+      <div class="node-center">
+        <div class="node-dot nd-all" style="font-size:.7rem;width:52px;height:52px;">3 legs</div>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="node-connector">↓</div>
+
+    <!-- NODE 8: LOI + HML -->
+    <div class="spine-node flip reveal">
+      <div class="node-content">
+        <span class="node-num">08</span>
+        <div class="node-title">The <em>LOI</em> and the <em>HML</em></div>
+        <div class="node-body">
+          <p>The Law of Intentivity is the science of how frequencies of being hold steady together, generate relational energy, and write patterns into reality. It maintains full compatibility with existing physics — no equations change. It extends C to include all light in all forms. It names what the mystery zones of physics are pointing at.</p>
+          <p>The Hu-Mana Language is the shared vocabulary the LOI speaks in. The letters — F, E, M, <span data-hml="rite" class="hml-term">RITE</span>, <span data-hml="femissphere" class="hml-term">FEMisSphere</span>, <span data-hml="cu" class="hml-term">CU</span>, <span data-hml="icu" class="hml-term">ICU</span>, <span data-hml="cw" class="hml-term">CW</span>, <span data-hml="lwave" class="hml-term">L-Wave</span> — each with three readings so that every tradition can find itself in the language without anyone having to abandon their own ground.</p>
+        </div>
+        <div class="node-links">
+          <a href="loi.html" class="node-link nl-loi">The Full LOI →</a>
+          <a href="hml.html" class="node-link nl-hml">The Complete HML →</a>
+        </div>
+      </div>
+      <div class="node-center">
+        <div class="node-dot nd-crown" style="font-size:.75rem;">LOI<br>HML</div>
+      </div>
+      <div></div>
+    </div>
+
+    <div class="node-connector">↓</div>
+
+    <!-- NODE 9: THE PRACTICE -->
+    <div class="spine-node reveal">
+      <div class="node-content">
+        <span class="node-num">09</span>
+        <div class="node-title">The <em>Practice</em></div>
+        <div class="node-body">
+          <p>Understanding the model is one thing. Living it is another. The map is free. The tools are where the map becomes the territory — practical, personal, immediately usable in the actual texture of a day. Thought by thought. Feeling by feeling. Moment by moment.</p>
+          <p>The Five Absolutes. The Observer Triad — I Am · I Remember · I Remain. The seven-note loop that returns you to yourself. Tools that don't just explain the model — they are the model, lived from the inside of your own lantern, cleaning your own glass, turning your own key.</p>
+        </div>
+        <div class="node-links">
+          <a href="spirituality.html#practice" class="node-link nl-spi">The Observer Triad →</a>
+          <a href="spirituality.html#absolutes" class="node-link nl-spi">The Five Absolutes →</a>
+          <a href="huarewe.html" class="node-link nl-crown">The Tools — HuAreWe →</a>
+        </div>
+      </div>
+      <div class="node-center">
+        <div class="node-dot nd-crown"><svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><path d="M12 12 Q16 8 18 10 Q20 12 18 14 Q16 16 12 12 Q8 8 6 10 Q4 12 6 14 Q8 16 12 12" fill="none" stroke="rgba(200,132,58,.2)" stroke-width=".8"/><circle cx="12" cy="12" r="3" fill="none" stroke="rgba(200,132,58,.35)" stroke-width=".6"><animate attributeName="r" values="2;8;2" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".4;0;.4" dur="4s" repeatCount="indefinite"/></circle><circle cx="12" cy="12" r="3" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".5"><animate attributeName="r" values="2;8;2" dur="4s" repeatCount="indefinite" begin="1.3s"/><animate attributeName="opacity" values=".3;0;.3" dur="4s" repeatCount="indefinite" begin="1.3s"/></circle><circle r="2.5" fill="rgba(168,220,239,.85)"><animateMotion dur="4s" repeatCount="indefinite" path="M12 12 Q16 8 18 10 Q20 12 18 14 Q16 16 12 12 Q8 16 6 14 Q4 12 6 10 Q8 8 12 12"/></circle><circle r="2" fill="rgba(50,30,100,.85)"><animateMotion dur="4s" repeatCount="indefinite" begin="2s" path="M12 12 Q16 8 18 10 Q20 12 18 14 Q16 16 12 12 Q8 16 6 14 Q4 12 6 10 Q8 8 12 12"/></circle><circle cx="12" cy="12" r="1.5" fill="rgba(242,200,122,.0)"><animate attributeName="fill-opacity" values="0;0;0;1;.4;0;0;0;1;.4;0" dur="4s" repeatCount="indefinite"/></circle></svg></div>
+      </div>
+      <div></div>
+    </div>
+
+  </div><!-- end spine-path -->
+</section>
+
+<!-- ══ ENTER THROUGH ANY DOOR ══ -->
+<section class="enter-section" id="enter">
+  <div class="content-wrap">
+    <span class="s-label reveal" style="text-align:center;display:block;">Enter at any point</span>
+    <h2 class="s-title reveal" style="text-align:center;">The model lives and breathes.<br><em>It meets you where you are.</em></h2>
+    <div class="s-body reveal" style="max-width:580px;margin:0 auto;text-align:center;">
+      <p>The Spine shows the complete unfolding in order. But no entry point is wrong. The model is a field — every part connects to every other part. You cannot enter incorrectly. You can only go deeper.</p>
+    </div>
+    <div class="enter-grid reveal">
+      <a href="science.html" class="enter-card ec-sci">
+        <span class="ec-icon"><svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="1"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg></span>
+        <div class="ec-title">Science</div>
+        <p class="ec-desc">The frequency was always there. Now you have the equation. Enter through mechanism and measurement.</p>
+      </a>
+      <a href="spirituality.html" class="enter-card ec-spi">
+        <span class="ec-icon"><svg class="hm-icon" width="16" height="20" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg></span>
+        <div class="ec-title">Spirituality</div>
+        <p class="ec-desc">The flame was never out. Only the glass needs cleaning. Enter through direct experience.</p>
+      </a>
+      <a href="philosophy.html" class="enter-card ec-phi">
+        <span class="ec-icon"><svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg></span>
+        <div class="ec-title">Philosophy</div>
+        <p class="ec-desc">Twelve civilizations. One pattern. You at the center. Enter through history and pattern.</p>
+      </a>
+      <a href="loi.html" class="enter-card ec-loi">
+        <span class="ec-icon"><svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><path d="M12 12 Q16 8 18 10 Q20 12 18 14 Q16 16 12 12 Q8 8 6 10 Q4 12 6 14 Q8 16 12 12" fill="none" stroke="rgba(200,132,58,.2)" stroke-width=".8"/><circle cx="12" cy="12" r="3" fill="none" stroke="rgba(200,132,58,.35)" stroke-width=".6"><animate attributeName="r" values="2;8;2" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".4;0;.4" dur="4s" repeatCount="indefinite"/></circle><circle cx="12" cy="12" r="3" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".5"><animate attributeName="r" values="2;8;2" dur="4s" repeatCount="indefinite" begin="1.3s"/><animate attributeName="opacity" values=".3;0;.3" dur="4s" repeatCount="indefinite" begin="1.3s"/></circle><circle r="2.5" fill="rgba(168,220,239,.85)"><animateMotion dur="4s" repeatCount="indefinite" path="M12 12 Q16 8 18 10 Q20 12 18 14 Q16 16 12 12 Q8 16 6 14 Q4 12 6 10 Q8 8 12 12"/></circle><circle r="2" fill="rgba(50,30,100,.85)"><animateMotion dur="4s" repeatCount="indefinite" begin="2s" path="M12 12 Q16 8 18 10 Q20 12 18 14 Q16 16 12 12 Q8 16 6 14 Q4 12 6 10 Q8 8 12 12"/></circle><circle cx="12" cy="12" r="1.5" fill="rgba(242,200,122,.0)"><animate attributeName="fill-opacity" values="0;0;0;1;.4;0;0;0;1;.4;0" dur="4s" repeatCount="indefinite"/></circle></svg></span>
+        <div class="ec-title">Law of Intentivity</div>
+        <p class="ec-desc">The science of how frequencies meet, generate energy, and write pattern into reality. The full architecture.</p>
+      </a>
+      <a href="hml.html" class="enter-card ec-hml">
+        <span class="ec-icon"><svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><path d="M12 3 L21 19 L3 19 Z" fill="rgba(200,132,58,.07)" stroke="rgba(200,132,58,.5)" stroke-width=".9"/><line x1="7" y1="19" x2="3" y2="24" stroke="rgba(90,180,216,.75)" stroke-width="1.5"><animate attributeName="opacity" values=".3;.9;.3" dur="3s" repeatCount="indefinite"/></line><line x1="12" y1="19" x2="12" y2="24" stroke="rgba(200,132,58,.75)" stroke-width="1.5"><animate attributeName="opacity" values=".3;.9;.3" dur="3s" repeatCount="indefinite" begin=".5s"/></line><line x1="17" y1="19" x2="21" y2="24" stroke="rgba(74,155,94,.75)" stroke-width="1.5"><animate attributeName="opacity" values=".3;.9;.3" dur="3s" repeatCount="indefinite" begin="1s"/></line><circle cx="12" cy="13" r="1.8" fill="rgba(242,200,122,.85)"><animate attributeName="r" values="1.5;2.2;1.5" dur="3s" repeatCount="indefinite"/></circle></svg></span>
+        <div class="ec-title">Hu-Mana Language</div>
+        <p class="ec-desc">The shared vocabulary. Every letter defined through all three legs simultaneously. The legend of the map.</p>
+      </a>
+      <a href="huarewe.html" class="enter-card ec-hub">
+        <span class="ec-icon"><svg class="hm-icon" width="16" height="20" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg></span>
+        <div class="ec-title">The Community</div>
+        <p class="ec-desc">Where the model becomes the living of the model. Tools. Practice. The field forming.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ WHAT CAME BEFORE ══ -->
+<section style="padding:8rem 4rem;position:relative;z-index:10;
+  background:radial-gradient(ellipse 70% 55% at 50% 50%,rgba(14,6,2,.9) 0%,transparent 100%);">
+  <div class="content-wrap">
+    <span class="s-label reveal">The Lineage</span>
+    <h2 class="s-title reveal">Standing on shoulders.<br><em>Going further.</em></h2>
+    <div class="s-body reveal">
+      <p>Humanity has never stopped trying to find the single language that science, spirituality, and philosophy all speak. The attempts have been serious, sustained, and brilliant. They deserve to be named — because understanding where each one reached its limit is the clearest way to show what the Hu-Mana Model does differently.</p>
+      <p><strong>Ken Wilber's Integral Theory</strong> — a rigorous four-quadrant map of all human knowledge domains. It tells you which room something belongs in. It does not give you a language that moves through all the rooms simultaneously. The walls remain. The Hu-Mana Model does not map the rooms. It dissolves the walls.</p>
+      <p><strong>David Bohm's Implicate Order</strong> — an enfolded reality beneath the explicate world. His instinct was precise. But he never completed the bridge to spirituality or philosophy in a usable form. What remained was a profound scientific intuition without a working vocabulary that non-physicists could inhabit.</p>
+      <p><strong>Rupert Sheldrake's morphic resonance</strong> — directly addresses the Consciousness Wave territory. His proposal maps closely onto what the Hu-Mana Model calls <span data-hml="cw" class="hml-term">CW</span> phenomena. But his framework does not contain the F/M polarity structure, the <span data-hml="lwave" class="hml-term">L-Wave</span> cycle, or the philosophical and spiritual integration that would make it a complete language.</p>
+      <p><strong>Alfred North Whitehead's Process Philosophy</strong> — the most structurally similar predecessor. His recognition that reality is fundamentally constituted by process and relation anticipates much of what the Hu-Mana Model formalizes. But it requires years of philosophical training to enter and never made the science bridge explicit.</p>
+      <p>What all of these frameworks share — and where each reaches its limit — is that they work by mapping existing domains onto each other. The Hu-Mana Model works one level beneath all three domains, at the level of pattern, polarity, resonance, and cycle. F and M are not borrowed from physics and applied to spirituality. They are the structural poles that physics, spirituality, and philosophy each discovered in their own domain. The Hu-Mana Language gives them a shared name so they can finally speak to each other without translation loss.</p>
+    </div>
+    <div class="pull-quote reveal">
+      <p>"What came before reached as far as it could from within the constraints of single-domain language. The Hu-Mana Model is what becomes possible when the language is built at the level where all three domains were always already one."</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CLOSING ══ -->
+<section class="sec-close" id="close">
+  <div class="content-wrap">
+    <span class="s-label reveal" style="display:block;text-align:center;">HuManaModel · v1</span>
+    <h2 class="s-title reveal" style="text-align:center;max-width:620px;margin:0 auto 1.4rem;">
+      The model is free.<br>
+      The flame was always yours.<br>
+      <em>This is just the language for it.</em>
+    </h2>
+    <div class="s-body reveal" style="max-width:580px;margin:0 auto 2.8rem;text-align:center;">
+      <p>The Spine will grow. New nodes will be added as the model deepens and the community builds. Every genuine contribution to the field becomes part of the living architecture. The model is not finished — it is alive. It breathes. It evolves.</p>
+      <p>This is HuManaModel version 1. The beginning of the unfolding.</p>
+    </div>
+    <div class="reveal">
+      <a href="huarewe.html" class="btn-enter">Join the Community — Free</a>
+      <a href="loi.html" class="btn-ghost">The Law of Intentivity</a>
+      <a href="hml.html" class="btn-ghost">The Hu-Mana Language</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="leg-footer">
+  <a href="index.html" style="font-family:var(--fd);font-size:1.4rem;font-weight:600;letter-spacing:.18em;color:var(--amber-glow);text-decoration:none;">Hu · Mana</a>
+  <ul class="leg-footer-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="science.html">Science</a></li>
+    <li><a href="spirituality.html">Spirituality</a></li>
+    <li><a href="philosophy.html">Philosophy</a></li>
+    <li><a href="loi.html">LOI</a></li>
+    <li><a href="hml.html">HML</a></li>
+    <li><a href="spine.html">Spine</a></li>
+    <li><a href="huarewe.html">Begin</a></li>
+  </ul>
+  <div class="leg-elh">elh</div>
+</footer>
+
+<button id="scroll-top" aria-label="Back to top">↑</button>
+
+<script>
+// Scroll top
+var st=document.getElementById('scroll-top');
+window.addEventListener('scroll',function(){
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>60);
+  if(st)st.classList.toggle('visible',window.scrollY>400);
+  if(!window._beam&&window.scrollY>80){
+    window._beam=true;
+    document.getElementById('beam-canvas').classList.add('alive');
+  }
+  document.querySelectorAll('.reveal').forEach(function(el){
+    if(el.getBoundingClientRect().top<window.innerHeight*.88)el.classList.add('visible');
+  });
+},{passive:true});
+if(st)st.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+window.addEventListener('load',function(){
+  // IntersectionObserver — robust reveal
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}
+      });
+    },{threshold:0.05,rootMargin:'0px 0px -40px 0px'});
+    document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  }
+  // Hard fallback
+  setTimeout(function(){
+    document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});
+  },3000);
+  document.querySelectorAll('.reveal').forEach(function(el){
+    if(el.getBoundingClientRect().top<window.innerHeight*.88)el.classList.add('visible');
+  });
+});
+
+// Hamburger
+(function(){
+  var b=document.getElementById('hamburger');
+  var m=document.getElementById('mobile-menu');
+  if(!b||!m)return;
+  b.addEventListener('click',function(){
+    var o=m.classList.toggle('open'); if(o&&typeof hmlHide==='function')hmlHide(); if(o&&typeof hmlSlideHide==='function')hmlSlideHide();
+    b.classList.toggle('open');
+    document.body.style.overflow=o?'hidden':'';
+  });
+  m.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click',function(){
+      m.classList.remove('open');
+      b.classList.remove('open');
+      document.body.style.overflow='';
+    });
+  });
+})();
+
+
+
+
+
+
+
+
+// ══ HML SLIDE-BY v34 ══
+var hmlDefs={"hu": {"title": "HU — The Base One of Being", "summary": "Existence itself before anything else. The first sound every tradition found independently.", "sc": "The ground beneath all field theory — existence before mass or energy.", "sp": "Found across twelve civilizations as the creative breath before the word.", "ph": "The base one before polarity — the first principle before anything becomes two."}, "mana": {"title": "Mana — The Living Field", "summary": "The medium everything moves through. HU is the source. Mana carries it.", "sc": "The quantum field — all frequency travels through it. Measured at 7.83 Hz.", "sp": "The living charge every culture named — Prana, Chi, Baraka, Pneuma.", "ph": "The sacred carrier between all things. Without it nothing reaches anything."}, "f": {"title": "F — Feminine Frequency", "summary": "The receptive orientation — field-holding, gathering, never found alone.", "sc": "One pole of magnetic polarity — receptive, drawing inward.", "sp": "Yin, Shakti, the void that holds. Not gender — orientation.", "ph": "The 9. The principle of potentiality. The field before the form."}, "m": {"title": "M — Masculine Frequency", "summary": "The expressive orientation — initiating, outward. With F it generates E.", "sc": "The second pole — expressive, outward. Alone it dissipates.", "sp": "Yang, Shiva, the word that breaks silence. Not gender — movement.", "ph": "The 3. The principle of actuality. Movement from potential into form."}, "e": {"title": "E — The Energy Between", "summary": "Only exists when both poles genuinely meet. Cannot be generated alone.", "sc": "Relational energy — measurable as coherence when both poles connect.", "sp": "Grace, awakening, the Tao in motion. Neither pole makes it alone.", "ph": "The emergent third — entirely new, generated only by genuine meeting."}, "rite": {"title": "RITE — The Completed Exchange", "summary": "A full exchange where both poles meet and both fields are changed.", "sc": "A complete energy exchange — both fields measurably changed.", "sp": "Every genuine ceremony. Real contact, not transaction.", "ph": "The unit of meaningful exchange. Incomplete RITEs do not disappear."}, "femrite": {"title": "FEMrite — The Living Exchange", "summary": "The smallest complete unit of the model. The proof it is not theory.", "sc": "The RITE traced between F and M — the model's smallest complete unit.", "sp": "Every genuine meeting — listening that receives, speaking that lands.", "ph": "FEM plus RITE completed. The polarity exchange in real contact."}, "femissphere": {"title": "FEMisSphere — The Shared Field", "summary": "The field surrounding any Consciousness Unit. When fields interact, a shared one forms — distinct from either alone. All continue expanding.", "sc": "The sun, moon, and earth each have one. The Schumann Resonance is Earth's FEMisSphere — shaped by every frequency within it.", "sp": "The atmosphere of a relationship. A classroom. A city. What you walk into before anyone speaks. Every RITE expands it.", "ph": "Individual fields grow through their own RITEs. Shared fields form and grow through combined ones. All connected. All affecting each other."}, "feminessence": {"title": "FEMinEssence — The Interaction of Frequencies", "summary": "The ongoing interaction of all RITEs between any frequencies in a field. Heat and shade change the flight of a bird. Same law at every scale.", "sc": "The interaction of all frequencies in a field generating new E. The Schumann Resonance is shaped by every frequency within and around Earth.", "sp": "Always present wherever two frequencies meet — a thought and a feeling, two people, sun and moon. Both CW and ICW active simultaneously.", "ph": "The same law from micro to macro without exception. Expressing at whatever harmonic each participant is capable of perceiving."}, "cu": {"title": "CU — Consciousness Unit", "summary": "Every self-organizing system that holds a coherent field. The rock. The cell. The sun. You.", "sc": "Any system maintaining a coherent electromagnetic field — from subatomic to cosmic scale.", "sp": "The vessel of the flame. Every being holds the light — not only those who know it.", "ph": "The unit through which consciousness expresses in form. Consciousness is the field. The unit holds it."}, "icu": {"title": "ICU — The Inner Observer", "summary": "The part of you that watches without becoming the reaction.", "sc": "The capacity to observe your own processing — where choice lives.", "sp": "The witness. Watching the reaction without becoming it.", "ph": "What every practice tradition is developing. Presence before response."}, "cw": {"title": "CW — Consciousness Wave", "summary": "The field every being broadcasts simply by being. Like a note filling a room whether anyone listens or not.", "sc": "Electromagnetic field coherence broadcast before contact, received before words. A classroom produces one collective measurable field.", "sp": "The presence felt before anyone speaks. What you read when you enter a room. The note that was already playing.", "ph": "A color carries frequency. Two colors create a harmonic between them. Every being is a note. Every space is a chord."}, "lwave": {"title": "L-Wave — The Cycle of All Things", "summary": "Expansion, peak, dissolution, return. The 12 always leads to the 3.", "sc": "The pattern all systems follow — expansion, peak, dissolution, return.", "sp": "The wave every tradition mapped. The dark night always leads to return.", "ph": "The structural guarantee that what dissolves returns. Always."}, "icw": {"title": "ICW — Intentional Consciousness Wave", "summary": "CW directed with awareness and purpose. The difference between a note played and a note played with feeling.", "sc": "The elevated field generated when a CU operates through its ICU with directed intention. Measurable as coherent state shift.", "sp": "The wave every genuine practice tradition is cultivating. Presence with purpose. The light aimed, not just burning.", "ph": "A higher harmonic of CW — not replacing it but riding above it. As intention deepens, new octaves of E emerge infinitely."}};
+var hmlIcons={sc:`<svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(90,180,216,.25)" stroke-width=".8"/><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.65)" stroke-width="18"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite"/></ellipse><ellipse cx="12" cy="12" rx="9" ry="3.5" fill="none" stroke="rgba(90,180,216,.35)" stroke-width=".7"><animateTransform attributeName="transform" type="rotate" from="60 12 12" to="420 12 12" dur="8s" repeatCount="indefinite"/></ellipse><circle cx="12" cy="12" r="2.2" fill="rgba(90,180,216,.9)"><animate attributeName="r" values="1.8;2.8;1.8" dur="3s" repeatCount="indefinite"/></circle></svg>`,sp:`<svg class="hm-icon" width="18" height="18" viewBox="0 0 16 20" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><defs><radialGradient id="spiG" cx="50%" cy="80%" r="60%"><stop offset="0%" stop-color="#F2C87A"/><stop offset="55%" stop-color="#E07820"/><stop offset="100%" stop-color="#C85A00"/></radialGradient></defs><g style="transform-origin:8px 16px;animation:iFlick 2.8s ease-in-out infinite;"><path d="M8 17 C5 14.5 4.5 10 6.5 7 C7 5.5 7.5 4 8 2 C8.5 4 9 5.5 9.5 7 C11.5 10 11 14.5 8 17Z" fill="url(#spiG)"/><path d="M8 16 C6.5 14 6 11 7.5 8.5 C8 7.5 8 7 8 6 C8 7 8 7.5 8.5 8.5 C10 11 9.5 14 8 16Z" fill="rgba(255,245,200,.75)"/><path d="M8 15 C7 13.5 6.8 11.5 7.5 9.5 C7.8 8.8 8 8.2 8 7.5 C8 8.2 8.2 8.8 8.5 9.5 C9.2 11.5 9 13.5 8 15Z" fill="rgba(255,255,240,.85)"/></g><style>@keyframes iFlick{0%,100%{transform:scaleX(1) scaleY(1);}30%{transform:scaleX(.9) scaleY(1.06);}60%{transform:scaleX(1.06) scaleY(.96);}}</style></svg>`,ph:`<svg class="hm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;flex-shrink:0;"><g style="transform-origin:12px 12px;animation:iRot 20s linear infinite;"><circle cx="12" cy="12" r="9" fill="none" stroke="rgba(74,155,94,.5)" stroke-width=".8"/><circle cx="12" cy="7" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="12" cy="17" r="5" fill="none" stroke="rgba(74,155,94,.4)" stroke-width=".65"/><circle cx="7.7" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="9.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="7.7" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/><circle cx="16.3" cy="14.5" r="5" fill="none" stroke="rgba(74,155,94,.35)" stroke-width=".65"/></g><circle cx="12" cy="12" r="2" fill="rgba(74,155,94,.85)"><animate attributeName="opacity" values=".5;1;.5" dur="4s" repeatCount="indefinite"/></circle><style>@keyframes iRot{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style></svg>`};
+var hmlCleared={};
+var hmlCurrentKey=null;
+var hmlHidden=false;
+
+function hmlBuild(key){
+  var d=hmlDefs[key];if(!d)return;
+  hmlCurrentKey=key;
+  document.getElementById('hml-slide-title').textContent=d.title;
+  document.getElementById('hml-slide-summary').textContent=d.summary;
+  // Build leg rows with links
+  var legs=[
+    {cls:'hml-leg-sc',icon:hmlIcons.sc,text:d.sc,tab:'sc'},
+    {cls:'hml-leg-sp',icon:hmlIcons.sp,text:d.sp,tab:'sp'},
+    {cls:'hml-leg-ph',icon:hmlIcons.ph,text:d.ph,tab:'ph'}
+  ];
+  var legsEl=document.getElementById('hml-slide-legs');
+  legsEl.innerHTML='';
+  legs.forEach(function(leg){
+    var a=document.createElement('a');
+    a.className='hml-leg-row '+leg.cls;
+    a.href='hml.html#'+key+'-'+leg.tab;
+    a.target='_blank';
+    a.rel='noopener';
+    a.innerHTML='<span class="hml-leg-icon">'+leg.icon+'</span><span class="hml-leg-text">'+leg.text+'</span>';
+    a.addEventListener('click',function(e){
+      e.preventDefault();
+      var nt=document.getElementById('hml-newtab');
+      nt.classList.add('show');
+      setTimeout(function(){
+        window.open('hml.html#'+key+'-'+leg.tab,'_blank');
+        setTimeout(function(){nt.classList.remove('show');},1500);
+      },600);
+    });
+    legsEl.appendChild(a);
+  });
+  // Crystals
+  var keys=Object.keys(hmlDefs);
+  var cr=document.getElementById('hml-crystals');cr.innerHTML='';
+  keys.forEach(function(k){
+    var c=document.createElement('span');
+    c.className='hml-slide-crystal'+(hmlCleared[k]?' lit':'');
+    cr.appendChild(c);
+  });
+}
+
+function hmlShow(key){
+  if(hmlHidden) return;
+  hmlBuild(key);
+  document.getElementById('hml-slide').classList.add('visible');
+}
+
+function hmlHide(){
+  document.getElementById('hml-slide').classList.remove('visible');
+}
+
+function hmlSlideClose(){hmlHide();}
+
+function hmlHideAll(){
+  hmlHidden=true;
+  hmlHide();
+}
+function hmlGotIt(){
+  if(hmlCurrentKey) hmlCleared[hmlCurrentKey]=true;
+  // Light up crystal
+  var keys=Object.keys(hmlDefs);
+  var idx=keys.indexOf(hmlCurrentKey);
+  var crystals=document.getElementById('hml-crystals').querySelectorAll('.hml-slide-crystal');
+  if(crystals[idx]) crystals[idx].classList.add('lit');
+  hmlHide();
+}
+
+// Scroll-based show/hide using IntersectionObserver
+
+function hmlInitObserver(){
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      var key=entry.target.getAttribute('data-hml');
+      if(!key) return;
+      if(entry.isIntersecting){
+        // Fade out current then fade in new
+        var slide=document.getElementById('hml-slide');
+        if(slide.classList.contains('visible') && hmlCurrentKey!==key){
+          slide.style.opacity='0';
+          setTimeout(function(){hmlShow(key);slide.style.opacity='1';},400);
+        } else {
+          hmlShow(key);
+        }
+      } else {
+        if(hmlCurrentKey===key) hmlHide();
+      }
+    });
+  },{
+    threshold:0.6,
+    rootMargin:'-120px 0px -120px 0px'
+  });
+  document.querySelectorAll('[data-hml]').forEach(function(el){obs.observe(el);});
+}
+
+// Also hide when hamburger opens
+document.addEventListener('DOMContentLoaded',function(){
+  hmlInitObserver();
+  var hamBtn=document.getElementById('hamburger');
+  if(hamBtn) hamBtn.addEventListener('click',function(){
+    var menu=document.getElementById('mobile-menu');
+    if(menu&&menu.classList.contains('open')) hmlHide();
+  });
+});
+// ══ END HML SLIDE-BY ══
+
+</script>
+</body>
+</html>
